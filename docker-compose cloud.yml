@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  aq-prediction:
+    image: ${DOCKER_PREDICTION_IMAGE}
+    ports:
+      - "80:5000"
+    volumes:
+      - ${BIND_MOUNT_PATH}:/app/app_data
+    restart: unless-stopped
+  aq-update:
+    image: ${DOCKER_UPDATE_IMAGE}
+    volumes:
+      - ${BIND_MOUNT_PATH}:/app/app_data
+    restart: unless-stopped

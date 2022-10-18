@@ -1,0 +1,35 @@
+FROM python:3.10-slim-buster@sha256:f2ee145f3bc4e061f8dfe7e6ebd427a410121495a0bd26e7622136db060c59e0
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
+
+# Install pip requirements
+COPY requirements.txt .
+RUN python -m pip install -r requirements.txt
+
+# Updating packages and installing cron
+RUN apt-get update && apt-get install cron -y
+
+ARG CACHEBUST=1
+
+# Copying into the container
+WORKDIR /app
+COPY . /app
+
+# Giving executable permission to the script file
+RUN chmod +x update.py
+
+# Adding crontab to the appropriate location
+ADD crontab.txt /etc/cron.d/my-cron-file
+
+# Giving permission to crontab file
+RUN chmod 0644 /etc/cron.d/my-cron-file
+
+# Running crontab
+RUN crontab /etc/cron.d/my-cron-file
+
+# Creating entry point for cron
+ENTRYPOINT ["cron", "-f"]

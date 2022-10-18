@@ -1,0 +1,18 @@
+version: "3.9"
+services:
+  aq-prediction:
+    build:
+      context: ./app
+      args:
+        CACHEBUST: 2
+    ports:
+      - "8000:5000"
+    volumes:
+      - ${BIND_MOUNT_PATH}:/app/app_data
+  aq-updater:
+    build:
+      context: ./update_app
+      args:
+        CACHEBUST: 2
+    volumes:
+        - ${BIND_MOUNT_PATH}:/app/app_data

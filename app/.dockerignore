@@ -1,0 +1,6 @@
+.env
+__pycache__
+*.ipynb
+.ipynb_checkpoints
+static/image-plots
+static/metrics-plots

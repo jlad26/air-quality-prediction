@@ -1,0 +1,926 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Air Quality Montpellier</title>
+<!--
+Modified from Newline Template
+https://templatemo.com/tm-503-newline
+-->
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/fontAwesome.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/templatemo-style.css') }}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/prediction.css') }}">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+        <script src="{{ url_for('static', filename='js/vendor/modernizr-2.8.3-respond-1.4.2.min.js') }}"></script>
+    </head>
+    <body class="lang--en">
+
+        <div class="loading-overlay">
+          <div class="loader"></div>
+        </div>
+        <div class="overlay"></div>
+        <section class="top-part">
+          <picture>
+            <source type="image/webp" srcset="{{ url_for('static', filename='img/industry-compressed.webp') }}">
+            <source type="image/jpeg" srcset="{{ url_for('static', filename='img/industry-compressed.jpg') }}">
+            <img src="{{ url_for('static', filename='img/industry-compressed.jpg') }}" alt="">
+          </picture>
+        </section>
+
+        <section class="cd-hero">
+
+          <div class="cd-slider-nav">
+            <nav>
+              <span class="cd-marker item-1"></span>
+              <ul>
+                <li class="selected">
+                  <a href="#0">
+                    <div class="image-icon"><img src="{{ url_for('static', filename='img/home-icon.png') }}"></div>
+                    <h6 class="lang--en">Home</h6>
+                    <h6 class="lang--fr">Accueil</h6>
+                  </a>
+                </li>
+                <li>
+                  <a href="#0">
+                    <div class="image-icon"><img src="{{ url_for('static', filename='img/how-it-works-icon.png') }}"></div>
+                    <h6 class="lang--en">How It Works</h6>
+                    <h6 class="lang--fr">Fonctionnement</h6>
+                  </a>
+                </li>
+                <li>
+                  <a href="#0">
+                    <div class="image-icon"><img src="{{ url_for('static', filename='img/performance-icon.png') }}"></div>
+                    <h6 class="lang--en">Performance</h6>
+                    <h6 class="lang--fr">Performance</h6>
+                  </a>
+                </li>
+                <li class="language-switcher">
+                  <a href="#" class="lang--fr" aria-label="English">
+                    <div class="image-icon"><img src="{{ url_for('static', filename='img/united-kingdom-flag-icon.png') }}"></div>
+                    <h6 class="lang--fr">English</h6>
+                  </a>
+                  <a href="#" class="lang--en" aria-label="Français">
+                    <div class="image-icon"><img src="{{ url_for('static', filename='img/france-flag-icon.png') }}">
+                    </div><h6 class="lang--en">Français</h6>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div> <!-- .cd-slider-nav -->
+
+          <ul class="cd-hero-slider">
+
+            <li class="selected">
+              <div class="heading">
+                <h1 class="lang--en">AIR QUALITY PREDICTOR</h1>
+                <h1 class="lang--fr">PRÉDICTEUR DE QUALITÉ D'AIR</h1>
+                <span>MONTPELLIER</span>
+              </div>
+              <div class="cd-full-width first-slide">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="content first-content">
+                        <h4 class="lang--en">Welcome</h4>
+                        <h4 class="lang--fr">Bienvenue</h4>
+                        <div class="lang--en">
+                          <p>
+                            This project aims to predict air quality 🌍 in <strong>Montpellier, France</strong> by applying machine learning techinques.
+                          </p>
+                          <p>
+                            Feel free to use the tool below to view predictions 📈 (current and past) for the five pollutants used
+                            in the EU Air Quality Index (<strong>NO2</strong>, <strong>O3</strong>, <strong>PM10</strong>,
+                            <strong>PM2.5</strong> and <strong>SO2</strong>). Some scenarios are suggested for you to try. The tool doesn't yet display
+                            the resulting Air Quality Index value - it's on my list... 📝
+                          </p>
+                          <p>
+                            The tool is a personal project I developed as part of my conversion to a data wrangler 🧑‍💻. All code is available
+                            in two repositories:
+                            <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Model Development and Selection</a>
+                            and <a href="https://github.com/jlad26/air-quality-prediction" target="_blank">Air Quality Prediction Application</a>.
+                            If you like what you see, do please check out my profile 👤 at <a target="_blank" href="https://cv.sneezingtrees.com">cv.sneezingtrees.com</a>
+                            (includes all my contact details).
+                          </p>
+                        </div>
+                        <div class="lang--fr">
+                          <p>
+                            Ce projet a le but de prédire la qualité de l'air 🌍 à <strong>Montpellier, France</strong> en utilisant des techniques
+                            d'apprentissage machine.
+                          </p>
+                          <p>
+                            Vous pouvez vous servir de l'outil ci-dessous pour voir des prédictions 📈 (actuelles et
+                            historiques) pour les cinq polluants de l'Indice Européen de la qualité de l'air (<strong>NO2</strong>, <strong>O3</strong>,
+                            <strong>PM10</strong>, <strong>PM2.5</strong> et <strong>SO2</strong>). Quelques scénarios sont mises à votre disposition.
+                            L'outil ne produit pas encore la valeur correspondante de l'Indice de la Qualité de l'air - c'est sur ma liste... 📝
+                          </p>
+                          <p>
+                            L'outil est un projet personnel que j'ai développé dans le cadre de ma conversion en data analyst 🧑‍💻. Le code est
+                            disponible dans deux répertoires:
+                            <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Développement et Sélection du Modèle</a>
+                            et <a href="https://github.com/jlad26/air-quality-prediction" target="_blank">Prédicteur de Qualité de l'Air</a>.
+                            Si vous aimez le résultat, veuillez voir mon profil 👤 à
+                            <a target="_blank" href="https://cv.sneezingtrees.com">cv.sneezingtrees.com</a> (où se trouvent mes coordonnées aussi).
+                          </p>
+                        </div>
+                        <div class="prediction pollutant-date">
+                          <img class="plot plot--wide lang--en" src="{{ default_img_dir }}/en-wide.png">
+                          <img class="plot plot--wide lang--fr" src="{{ default_img_dir }}/fr-wide.png">
+                          <img class="plot plot--narrow lang--en" src="{{ default_img_dir }}/en-narrow.png">
+                          <img class="plot plot--narrow lang--fr" src="{{ default_img_dir }}/fr-narrow.png">
+                          <div class="inputs-container">
+                            <div class="inputs">
+                              <div class="input">
+                                <label for="pollutant-choice-1">
+                                  <span class="lang--en">Pollutant:</span>
+                                  <span class="lang--fr">Polluant:</span>
+                                </label>
+                                <select id="pollutant-choice-1" class="pollutant-choice">
+                                  <option value="NO2" selected>NO2</option>
+                                  <option value="O3">O3</option>
+                                  <option value="PM10">PM10</option>
+                                  <option value="PM2.5">PM2.5</option>
+                                  <option value="SO2">SO2</option>
+                                </select>
+                              </div>
+                              <div class="input">
+                                <label for="start-pollutant-date">
+                                  <span class="lang--en">From:</span>
+                                  <span class="lang--fr">Du:</span>
+                                </label>
+                                <input id="start-pollutant-date" class="flatpickr start-date" type="text" value="{{ last_forecast_start }}">
+                                <input class="min-date" type="hidden" value = "{{earliest_forecast_start}}">
+                                <input class="max-date" type="hidden" value = "{{last_forecast_start}}">
+                              </div>
+                              <div class="input">
+                                <label for="pollutant-choice-1">
+                                  <span class="lang--en">Days:</span>
+                                  <span class="lang--fr">Jours:</span>
+                                </label>
+                                <select id="days-choice-1" class="days-choice">
+                                  <option value="1">1</option>
+                                  <option value="2">2</option>
+                                  <option value="3" selected>3</option>
+                                  <option value="4">4</option>
+                                  <option value="5">5</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="scenarios-container">
+                            <label for="scenarios-choice-en" class="lang--en">Scenario:</label>
+                            <div class="scenarios lang--en">
+                              <select id="scenarios-choice-en" class="scenarios-choice">
+                                <option value="" selected>Choose...</option>
+                                <option value="forecast-3" selected>Latest 3 day forecast</option>
+                                <option value="last-training">Last 3 days of training</option>
+                                <option value="last-validation">Last day of validation</option>
+                                <option value="last-known">Last day of known data</option>
+                              </select>
+                            </div>
+                            <label for="scenarios-choice-fr" class="lang--fr">Scénario:</label>
+                            <div class="scenarios lang--fr">
+                              <select id="scenarios-choice-fr" class="scenarios-choice">
+                                <option value="" selected>Choisir...</option>
+                                <option value="forecast-3" selected>Prédiction 3 jours</option>
+                                <option value="last-training">Dernier 3 jours d'entraînement</option>
+                                <option value="last-validation">Dernier jour de validation</option>
+                                <option value="last-known">Dernier jour des données connues</option>
+                              </select>
+                            </div>
+                            <div class="key-dates-values">
+                              <input id="train_end_time" type="hidden" value="{{ train_end_time }}">
+                              <input id="validation_end_time" type="hidden" value="{{ validation_end_time }}">
+                              <input id="actual_end_time" type="hidden" value="{{ actual_end_time }}">
+                              <input id="last_forecast_start" type="hidden" value="{{ last_forecast_start }}">
+                            </div>
+                          </div>
+                          <div class="primary-button">
+                            <a id="pollutants-predict-btn" class="predict-btn" href="fetch-pollutant">
+                              <span class="lang--en">Display</span>
+                              <span class="lang--fr">Afficher</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="content">
+                        <h4 class="lang--en">Dataset Key Dates</h4>
+                        <h4 class="lang--fr">Dates de Référence du Jeu de Données</h4>
+
+                        <div class="key-times-bar-container">
+
+                          <div class="key-times-bar-labels__upper">
+                            <div class="key-times-bar-label untrained-actual">
+                              {{ actual_end_time }}
+                            </div>
+                            <div class="key-times-bar-label validation" style="width: {{ train_percent + validation_percent }}%">
+                              {{ validation_end_time }}
+                            </div>
+                          </div>
+
+                          <div class="key-times-bar">
+                            <div class="train" style="width: {{ train_percent }}%"></div>
+                            <div class="validation" style="width: {{ validation_percent }}%"></div>
+                            <div class="untrained-actual" style="width: {{ untrained_actual_percent }}%"></div>
+                          </div>
+
+                          <div class="key-times-bar-labels__lower" style="width: {{ train_percent }}%">
+                            <div class="key-times-bar-label train">
+                              {{ train_start_time }}
+                            </div>
+                            <div class="key-times-bar-label train">
+                              {{ train_end_time }}
+                            </div>
+                          </div>
+
+                        </div>
+
+                        <div class="key-times-bar-key">
+
+                          <div>
+                            <div class="key-label train">
+                              <div></div>
+                              <div>
+                                <span class="lang--en">Training</span>
+                                <span class="lang--fr">entraînement</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div class="key-label validation">
+                              <div></div>
+                              <div>
+                                <span class="lang--en">Validation</span>
+                                <span class="lang--fr">Validation</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div class="key-label untrained-actual">
+                              <div></div>
+                              <div>
+                                <span class="lang--en">Known actual</span>
+                                <span class="lang--fr">Réelles connues</span>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+
+                      <div class="content">
+                        <h4 class="lang--en">Summary Explanations</h4>
+                        <div class="lang--en">
+
+                          <ul>
+                            <li>
+                              The model is trained on <strong>pollutant data</strong> 🏭 and on <strong>weather data</strong> 🌦, as weather has an impact on
+                              pollutant concentration. When predicting, past pollutant data, past weather data and weather forecast data are used
+                              as inputs to the model.
+                            </li>
+                            <li>
+                              All data is <strong>hourly</strong>. The model takes in the last 32 hours 🕒 of data in order to predict the next 24 hours.
+                              When a forecast is made for a longer period, the prediction is <strong>auto-regressive</strong>, meaning that the first
+                              day is predicted, then that prediction is used as part of the input for the next day's prediction. This means that
+                              prediction accuracy tends to drop for the later days in a multi-day forecast.
+                            </li>
+                            <li>
+                              Predictions are <strong>probabilistic</strong>. The band of colour represents the 5th and 95th quantile of the prediction 🧮.
+                              The line shows the median prediction, which is essentially equivalent to the result of a deterministic prediction.
+                            </li>
+                            <li>
+                              <strong>Training</strong> data is the data the model was trained on. <strong></strong>Validation</strong> data is the data
+                              used to work out when to stop training ✋ (to prevent <strong>over-fitting</strong>). <strong>Known actual</strong> data is data
+                              from the past (that we therefore know) which wasn't used in either training or validation.
+                            </li>
+                            <li>
+                              Performance 🚀 is measured using Mean Absolute Error (<strong>MAE</strong>) and Mean Absolute Percentage Error
+                              (<strong>MAPE</strong>). Whenever actual data overlaps with prediction data, these metrics are displayed in the chart title.
+                            </li>
+                            <li>
+                              The model seems to perform best for the pollutant <strong>Nitrous Oxide (NO2)</strong>. This may be because its
+                              concentration is more strongly influenced by weather conditions.
+                            </li>
+                          </ul>
+
+                        </div>
+
+                        <h4 class="lang--fr">Explications Sommaires</h4>
+                        <div class="lang--fr">
+
+                          <ul>
+                            <li>
+                              Le modèle est entraîné avec des <strong>données des polluants</strong> 🏭 et avec des <strong>données de la
+                              météo</strong> 🌦, puisque le temps influence les concentrations des polluants. En calculant la prédiction,
+                              des données historiques des polluants, des données météorologiques historiques et une prévision météo sont
+                              les entrées du modèle.
+                            </li>
+                            <li>
+                              Toutes les données sont <strong>horaires</strong>. Le modèle se sert des dernières 32 heures 🕒 des données
+                              pour prédire les 24 heures suivantes. Quand il calcule une prédiction de durée plus longue, la prédiction est
+                              <strong>auto-régressive</strong>, qui veut dire qu'il calcule la prédiction de la première journée, et ensuite
+                              il utilise ce résultat en tant qu'entrée pour la prédiction de la journée suivante. Cela implique que la précision
+                              de la prédiction a tendance à réduire pour les jours ultérieurs d'une prédiction de plusieurs jours.
+                            </li>
+                            <li>
+                              Les prédictions sont <strong>probabilistes</strong>. La bande de couleur signifie le 5ème quantile et le 95ème
+                              quantile de la prédiction 🧮. La ligne indique la prédiction médiane, qui correspond effectivement au résultat
+                              d'une prédiction déterministe.
+                            </li>
+                            <li>
+                              Les données d'<strong>entraînement</strong> sont les données avec lesquelles le modèle était entraîné. Les données de
+                              <strong>validation</strong> sont les données que le modèle utilise pour savoir quand il faut cesser d'apprendre ✋
+                              (pour éviter <strong>overfitting</strong>). Les données <strong>réelles connues</strong> sont historiques
+                              (et donc connues) qui n'étaient pas utilisées pendant l'entraînement ou la validation.
+                            </li>
+                            <li>
+                              La performance 🚀 est calculée en utilisant l'Erreur Absolue Moyenne (<strong>MAE</strong>) et le Pourcentage d'Erreur
+                              Absolue Moyen (<strong>MAPE</strong>) . Quand les données connues et les données de prédiction se chevauchent, les deux
+                              mesures sont affichées dans le titre du diagramme.
+                            </li>
+                            <li>
+                              On dirait que le modèle est la plus performante en prédisant la concentration du polluant <strong>Nitrous Oxide (NO2)</strong>.
+                              On peut imaginer que cela est parce que sa concentration est plus influencée par le temps.
+                            </li>
+
+                          </ul>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="heading">
+                <h1 class="lang--en">How It Works</h1>
+                <h1 class="lang--fr">Fonctionnement</h1>
+                <span class="lang--en">Discover the processes and technologies used</span>
+                <span class="lang--fr">Découvrir les méthodes et les technologies utilisées</span>
+              </div>
+              <div class="cd-half-width second-slide">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="content offset-grid">
+                        <div class="grid-row">
+                          <div class="grid-col-7 left-image">
+                            <img src="{{ url_for('static', filename='img/core-tech.jpg') }}">
+                          </div>
+                          <div class="grid-col-5">
+                            <div class="img-text--text lang--en">
+                              <h4>Core tech</h4>
+                              <ul>
+                                <li>
+                                  <a href="https://unit8co.github.io/darts/" target="_blank">Darts</a> Python library for timeseries forecasting. Final
+                                  model chosen - <strong>Temporal Fusion Transformer</strong>.
+                                </li>
+                                <li>
+                                  My custom codebase (on <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Github</a>)
+                                  developed as a wrapper to the Darts library for easy testing and comparison of the various Darts models.
+                                </li>
+                              </ul>
+                            </div>
+                            <div class="img-text--text lang--fr">
+                              <h4>Tech essentiel</h4>
+                              <ul>
+                                <li>
+                                  Bibliothèque <a href="https://unit8co.github.io/darts/" target="_blank">Darts</a> Python pour prédiction des séries
+                                  chronologiques. Modèle final choisi - <strong>Temporal Fusion Transformer</strong>.
+                                </li>
+                                <li>
+                                  Ma base de code sur mesure (sur <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Github</a>)
+                                  développé comme habillage de la bibliothèque Darts pour vérification et comparaison facile de la gamme des modèles
+                                  de Darts.
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="grid-row">
+                          <div class="grid-col-5 right-image">
+                            <img src="{{ url_for('static', filename='img/model-development-and-selection.jpg') }}">
+                          </div>
+                          <div id="model-development-and-selection" class="grid-col-7 scroll-offset">
+                            <div class="img-text--text lang--en">
+                              <h4>Model development and selection</h4>
+                              <ul>
+                                <li>
+                                  <a href="#data-sourcing">Data Sourcing</a> - Identifying and downloading from free sources of pollutant and weather data
+                                </li>
+                                <li>
+                                  <a href="#data-processing">Data Processing</a> - Structuring, cleaning and filling gaps in the data
+                                </li>
+                                <li>
+                                  <a href="#model-training-and-selection">Model Training and Selection</a> - Training a portfolio of different models on the same data to identify the best performer
+                                </li>
+                              </ul>
+                            </div>
+                            <div class="img-text--text lang--fr">
+                              <h4>Développement et sélection du modèle</h4>
+                              <ul>
+                                <li>
+                                  <a href="#data-sourcing">Recherche des Données</a> - Identifier et télécharger les données météorologiques et des polluants des sources gratuites
+                                </li>
+                                <li>
+                                  <a href="#data-processing">Traitement des Données</a> - Structurer, nettoyer et remplir les lacunes des données
+                                </li>
+                                <li>
+                                  <a href="#model-training-and-selection">Entraînement et sélection du modèle</a> - Entraîner une sélection de modèles différents en utilisant les mêmes données pour
+                                  identifier le plus performant
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="grid-row">
+                          <div class="grid-col-7 left-image">
+                            <img src="{{ url_for('static', filename='img/deployment.jpg') }}">
+                          </div>
+                          <div id="prediction-application" class="grid-col-5 scroll-offset">
+                            <div class="img-text--text lang--en">
+                              <h4>Prediction Application</h4>
+                              <ul>
+                                <li>
+                                  <a href="#update-process">Update process</a> - Automatic daily download, cleaning and update of data
+                                </li>
+                                <li>
+                                  <a href="#deployment">Deployment</a> - Web app using Flask, Gunicorn and Docker deployed on cloud server
+                                </li>
+                              </ul>
+                            </div>
+                            <div class="img-text--text lang--fr">
+                              <h4>Application de Prédiction</h4>
+                              <ul>
+                                <li>
+                                  <a href="#update-process">Processus de mise à jour</a> - Téléchargement, nettoyage et mise à jour automatique hebdomadaire des données
+                                </li>
+                                <li>
+                                  <a href="#deployment">Deployment</a> - Appli web avec Flask, Gunicorn et Docker déployé sur serveur cloud
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <div class="content">
+
+                        <div id="data-sourcing" class="scroll-offset">
+
+                          <h4 class="lang--en back-up-link">
+                            Data Sourcing
+                            <a href="#model-development-and-selection" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--en">
+
+                            <p>I tried a variety of sources before settling on the following:</p>
+
+                            <ul>
+                              <li>
+                                <strong>Pollutants</strong> - <a href="https://www.geodair.fr/" target="_blank">Geod'Air</a>.
+                                Bulk download is available direcly via the site but is limited to certain volumes so
+                                I needed <strong>multiple downloads</strong> for the inital training dataset. An API is also available for
+                                a daily download which I used for the daily update of the prediction app.
+                              </li>
+                              <li>
+                                <strong>Historic weather</strong> - <a href="https://meteostat.net/" target="_blank">Meteostat</a>.
+                                Meteostat provide an excellent API in a <strong>PyPI library</strong> - comprehensive and easy to use.
+                              </li>
+                              <li>
+                                <strong>Weather forecast</strong> -
+                                <a href="https://www.worldweatheronline.com/developer/" target="_blank">World Weather Online</a> for initial
+                                bulk download. <a href="https://open-meteo.com/" target="_blank">Open Meteo</a> for daily download.
+                                World Weather Online is only free for 30 days, but it has a bulk download facility. Open Meteo does't
+                                have bulk download for data before a certain date, but it is free. Therefore I used both,
+                                <strong>merging</strong>the two sets of data into one.
+                              </li>
+                            </ul>
+                          </div>
+
+                          <h4 class="lang--fr back-up-link">
+                            Recherche des Données
+                            <a href="#model-development-and-selection" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--fr">
+
+                            <p>J'ai essayé plusieurs sources avant de choisir celles-ci:</p>
+
+                            <ul>
+                              <li>
+                                <strong>Polluants</strong> - <a href="https://www.geodair.fr/" target="_blank">Geod'Air</a>.
+                                Téléchargement en bloc est disponible par le site mais la quantité par opération est limitée,
+                                donc <strong>plusieurs téléchargements</strong> étaient nécessaires pour le jeu de données initial. Un API est
+                                aussi disponible, et je l'ai utilisé pour la mise à jour hebdomadaire de l'appli de prédiction.
+                              </li>
+                              <li>
+                                <strong>Météo historique</strong> - <a href="https://meteostat.net/" target="_blank">Meteostat</a>.
+                                Meteostat fournisse un API excellent dans une <strong>bibliothèque PyPI</strong> - exhaustive et
+                                facile à utiliser.
+                              </li>
+                              <li>
+                                <strong>Prévision météo</strong> -
+                                <a href="https://www.worldweatheronline.com/developer/" target="_blank">World Weather Online</a> pour le
+                                téléchargement en bloc initial. <a href="https://open-meteo.com/" target="_blank">Open Meteo</a> pour la
+                                mise à jour hebdomadaire. La période gratuite de World Weather Online ne dure que 30 jours, mais ils ont un
+                                outil de téléchargement en bloc. Open Meteo ne permet pas le téléchargement en bloc pour les données
+                                avant une date certaine, mais le service est gratuit. Donc je m'en suis servi des deux, en
+                                <strong>combinant</strong> les deux jeux de données en un seul.
+                              </li>
+                            </ul>
+                          </div>
+
+                        </div>
+                      </div>
+
+                      <div class="content">
+
+                        <div id="data-processing" class="scroll-offset">
+
+                          <h4 class="lang--en back-up-link">
+                            Data Processing
+                            <a href="#model-development-and-selection" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--en">
+                            <ul>
+                              <li>
+                                Some pollutants are measured at multiple sites in Montpellier, so I took the <strong>average</strong> across all sites
+                                in those cases. SO2, however, is not measured at all in Montpellier. The nearest location is Marseille so I took
+                                that data instead. This meant I needed to use <strong>Marseille</strong> weather data for this pollutant instead
+                                of Montpellier data.
+                              </li>
+                              <li>
+                                The data is not always complete and had to be filled using <strong>interpolation</strong> and
+                                <strong>forward fill</strong> where necessary. In some cases there are long periods of many hours missing values.
+                                Where there was more than half a day missing I copied the data from the same day in another year.
+                              </li>
+                            </ul>
+                          </div>
+
+                          <h4 class="lang--fr back-up-link">
+                            Traitement des données
+                            <a href="#model-development-and-selection" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--fr">
+                            <ul>
+                              <li>
+                                Les concentrations de certains polluants sont mesurés à plusieurs endroits à Montpellier, donc j'ai pris la
+                                <strong>moyenne</strong> dans ces cas. Par contre SO2 n'est mesuré nulle part à Montpellier. Le lieu
+                                le plus proche est Marseille donc j'ai utilisé ces données à la place. Cela voulait dire que j'ai dû utiliser
+                                les données météorologiques de <strong>Marseille</strong> pour ce polluant au lieu des données de Montpellier.
+                              </li>
+                              <li>
+                                Les données ne sont pas toujours complètes et on a dû remplir les lacunes par <strong>interpolation</strong> et
+                                <strong>forward fill</strong> si nécessaire. Parfois on trouve des périodes longues de plusieurs heures sans valeur.
+                                Quand il manquait plus qu'une demi-journée j'ai copié des donneés du même jour d'une autre année.
+                              </li>
+                            </ul>
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <div class="content">
+
+                        <div id="model-training-and-selection" class="scroll-offset">
+
+                          <h4 class="lang--en back-up-link">
+                            Model Training and Selection
+                            <a href="#model-development-and-selection" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--en">
+                            <ul>
+                              <li>
+                                The Darts library contains models that have different configuration parameters according to their type.
+                                This makes it cumbersome to trial several models in a <strong>standardised</strong> way, so I developed a
+                                Python package that allowed me to do just that.
+                              </li>
+                              <li>
+                                For example, my package automatically adds in past and/or future <strong>covariates</strong> (the weather data)
+                                depending on the model's capability. It also gives the user the option to exclude those covariates and whether to
+                                add in <strong>seasonal</strong> time information such as hour, day and month data. This is useful for evaluating
+                                whether or not the inclusion of covariates aids performance.
+                              </li>
+                              <li>
+                                The package also allows me to switch easily between validation and test mode. I split the whole dataset into three -
+                                <strong>training (80%)</strong>, <strong>validation (10%)</strong>, and <strong>test (10%)</strong>. When testing
+                                models I used the training set to train and the validation set to validate and assess performance. Once the final
+                                model was selected I trained on training and validation combined (90%) and used the test set for
+                                <strong>early stopping</strong> (to prevent overfitting), and to estimate likely performance. Once trained,
+                                this model was used in the prediction app.
+                              </li>
+                              <li>
+                                Of 7 model types tested using their default configurations, the <strong>Temporal Fusion Transformer (TFT)</strong>
+                                performed best on the NO2 data. The Auto ARIMA model took too long to train on the full time period so I compared it
+                                with the TFT over a shorter period. As the strongest, the TFT was used in the prediction app.
+                              </li>
+                              <li>
+                                There are in fact <strong>five</strong> models used in the app - one for each pollutant. Although it is possible
+                                to train a TFT on multiple target series simultaneously I found the results were not as good.
+                              </li>
+                              <li>
+                                The results of the tests can be seen below for a 1, 3 and 5 day forecast at the beginning of the validation period.
+                                The TFT performs adequately on 1 day and is the <strong>top performer</strong> for 3 and 5 days.
+                              </li>
+                            </ul>
+                          </div>
+
+                          <h4 class="lang--fr back-up-link">
+                            Entraînement et Sélection du Modèle
+                            <a href="#model-development-and-selection" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--fr">
+                            <ul>
+                              <li>
+                                La bibliothèque Darts contient des modèles avec des paramètres qui varient selon le type de modèle.
+                                Par conséquent, entraîner plusieurs modèles de manière <strong>standardisée</strong> peut être un
+                                opération lourde, donc j'ai écrit un package Python pour faciliter un tel processus.
+                              </li>
+                              <li>
+                                Par exemple, mon package inclut automatiquement les <strong>données covariables</strong> passées et/ou futurs
+                                (les données météorologiques) selon la capacité du modèle. Le package permet aussi à l'utilisateur d'exclure
+                                ces données covariables et d'ajouter des données saisonnières temporelles comme l'heure, le jour, et le mois.
+                                C'est utile pour évaluer si l'inclusion des données covariables améliore la performance.
+                              </li>
+                              <li>
+                                Le package me permet aussi de changer facilement entre les modes validation et test. J'ai divisé le jeu de données
+                                en trois - <strong>entraînement (80%)</strong>, <strong>validation (10%)</strong>, et <strong>test (10%)</strong>.
+                                En comparant les modèles j'ai utilisé le jeu de données d'entraînement pour entraîner et le jeu de données de
+                                validation pour valider et pour évaluer la performance. Une fois que le modèle final avait été choisie je l'ai
+                                entraîné avec la combinaison des jeux de données d'entraînement et de validation (90%) et j'ai utilisé le jeu de
+                                données de test pour <strong>l'arrêt précoce</strong> (pour éviter overfitting), et pour estimer la performance
+                                probable. Une fois entraîné, on a utilisé ce modèle dans l'appli de prédiction.
+                              </li>
+                              <li>
+                                Des 7 types de modèle évalués en utilisant leur configurations par défaut, le
+                                <strong>Temporal Fusion Transformer (TFT)</strong> a eu les meilleurs résultats sur les données de NO2. Il fallait
+                                trop longtemps pour entraîner le modèle Auto ARIMA sur la période entière donc je l'ai comparé avec le TFT en
+                                utilisant une période plus courte. Soyant toujours le plus performant, le TFT était utilisé dans l'appli de prédiction.
+                              </li>
+                              <li>
+                                Il y a en fait <strong>cinq</strong> modèles utilisés par l'appli - un pour chaque polluant. Bien qu'il soit
+                                possible d'entraîner un TFT avec des séries cibles en même temps, j'ai trouvé que les résultats étaient moins
+                                bons.
+                              </li>
+                              <li>
+                                Les résultats des évaluations sont affichés ci-dessous pour des prédictions de 1, 3 et 5 jours au début de la
+                                période de validation. Le TFT produit des résultats adéquats pour la prédiction d'un jour et il est
+                                <strong>le plus performant</strong> pour les prédictions de 3 et 5 jours.
+                              </li>
+                            </ul>
+                          </div>
+
+                          <div class="three-col">
+                            <div class="three-col__col">
+                              <h5 class="lang--en">1 Day</h5>
+                              <h5 class="lang--fr">1 Jour</h5>
+                              <img src="{{ url_for('static', filename='img/1-day-forecast-metrics.png') }}">
+                            </div>
+                            <div class="three-col__col">
+                              <h5 class="lang--en">3 Days</h5>
+                              <h5 class="lang--fr">3 Jours</h5>
+                              <img src="{{ url_for('static', filename='img/3-day-forecast-metrics.png') }}">
+                            </div>
+                            <div class="three-col__col">
+                              <h5 class="lang--en">5 Day</h5>
+                              <h5 class="lang--fr">5 Jours</h5>
+                              <img src="{{ url_for('static', filename='img/5-day-forecast-metrics.png') }}">
+                            </div>
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <div class="content">
+
+                        <div id="update-process" class="scroll-offset">
+
+                          <h4 class="lang--en back-up-link">
+                            Update process
+                            <a href="#prediction-application" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--en">
+                            <ul>
+                              <li>
+                                The site is updated automatically each day to show forecasts starting from the <strong>current day</strong>.
+                              </li>
+                              <li>
+                                New data - pollutants, historical weather and weather forecast - is fetched each day via API
+                                <strong>automatically</strong>, cleaned and added to the existing data set. Several attempts are made
+                                throught the day to fetch data if for any reason data is unavailable when expected.
+                              </li>
+                            </ul>
+                          </div>
+
+                          <h4 class="lang--fr back-up-link">
+                            Update process
+                            <a href="#prediction-application" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--fr">
+                            <ul>
+                              <li>
+                                Le site web se met à jour automatiquement chaque jour pour que les prédictions puissent commencer
+                                du <strong>jour actuel</strong>.
+                              </li>
+                              <li>
+                                Les nouvelles données - les pollutants, les données météorologiques historiques et la prévision météo -
+                                sont récupérees chaque jour par API <strong>automatiquement</strong>, nettoyées et ajoutées au jeu de données
+                                existant. Plusieurs essais sont faits pendant la journée à récupérer les données si pour une raison ou une autre
+                                les données ne sont pas disponibles au moment anticipé.
+                              </li>
+                            </ul>
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                      <div class="content">
+
+                        <div id="deployment" class="scroll-offset">
+
+                          <h4 class="lang--en back-up-link">
+                            Deployment
+                            <a href="#prediction-application" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--en">
+                            <ul>
+                              <li>
+                                The application is divided into two components - the daily update and the website. They are implemented with
+                                <a href="https://www.docker.com/" target="_blank">Docker</a> using two containers that <strong>share</strong> a network and a bind mount.
+                              </li>
+                              <li>
+                                The Docker containers are hosted on a Linux server at <a href="https://www.kamatera.com/" target="_blank">Kamatera</a> (whose
+                                performance I found to be <strong>vastly superior</strong> to Azure for the same price.)
+                              </li>
+                              <li>
+                                The website runs on <a href="https://flask.palletsprojects.com/" target="_blank">Flask</a> and a
+                                <a href="https://docs.gunicorn.org/" target="_blank">Gunicorn</a> web server. The theme is a customised version of the
+                                <a href="https://templatemo.com/tm-503-newline" target="_blank">templatemo Newline template</a>.
+                              </li>
+                              <li>
+                                The site uses the Javascript
+                                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank">Fetch API</a> to update the displayed
+                                forecast charts in response to a user's selection. Plots generated are cached in a simple cache that is emptied once it contains a
+                                certain number of images.
+                              </li>
+                            </ul>
+                          </div>
+
+                          <h4 class="lang--fr back-up-link">
+                            Deployment
+                            <a href="#prediction-application" aria-label="Back"></a>
+                          </h4>
+                          <div class="lang--fr">
+                            <ul>
+                              <li>
+                                L'application est divisée en deux composants - la partie mise à jour et le site web. Ils sont mis en oeuvre avec
+                                <a href="https://www.docker.com/" target="_blank">Docker</a> en utilisant deux containers qui <strong>partagent</strong>
+                                un réseau et un bind mount.
+                              </li>
+                              <li>
+                                Les containers Docker sont hébergés par un serveur Linux à <a href="https://www.kamatera.com/" target="_blank">Kamatera</a>
+                                (dont la performance j'ai trouvé <strong>largement supérieure</strong> que celle d'Azure pour le même prix.)
+                              </li>
+                              <li>
+                                Le site web fonctionne sur <a href="https://flask.palletsprojects.com/" target="_blank">Flask</a> et un serveur web
+                                <a href="https://docs.gunicorn.org/" target="_blank">Gunicorn</a>. La thème est une version customisée du
+                                <a href="https://templatemo.com/tm-503-newline" target="_blank">modèle templatemo Newline</a>.
+                              </li>
+                              <li>
+                                Le site web se sert du
+                                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank">Fetch API</a> Javascript
+                                pour mettre à jour les diagrammes affichés en réponse à la selection d'un(e) utilisateur(se). Les diagrammes qui sont
+                                créés sont cachés dans un cache simple qui si vide quand il contient une certaine quantité de fichier.
+                              </li>
+                            </ul>
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="heading">
+                <h1 class="lang--en">Performance</h1>
+                <h1 class="lang--fr">Performance</h1>
+                <span class="lang--en">Analysis of forecast vs actual</span>
+                <span class="lang--fr">Analyse de prédiction vs réel</span>
+              </div>
+              <div class="cd-full-width third-slide">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="content">
+
+                        <h4 class="lang--en">Introduction</h4>
+                        <div class="lang--en">
+                          <p>
+                            Presented below are charts for each pollutant that show how Mean Absolute Error (MAE)
+                            <strong>changes over time</strong>.
+                          </p>
+                          <ul>
+                            <li>
+                              The charts begin <strong>30 days</strong> before the end of the validation data, and finish at the
+                              end of known data.
+                            </li>
+                            <li>
+                              The purpose of these charts is to monitor <strong>drift</strong> - a decline in performance over time.
+                              This can be used as an indicator that the model should be <strong>retrained</strong> on the new data.
+                            </li>
+                            <li>
+                              MAE is used rather then Mean Absolute Percentage Error (MAPE) because for some pollutants
+                              (particularly SO2) where concentrations are near zero, the MAPE value can become very large
+                              and effectively <strong>meaningless</strong>.
+                            </li>
+                          </ul>
+                        </div>
+
+                        <h4 class="lang--fr">Introduction</h4>
+                        <div class="lang--fr">
+                          <p>
+                            Affiché ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent comment l'Erreur Absolue
+                            Moyenne (MAE) <strong>change dans le temps</strong>.
+                          </p>
+                          <ul>
+                            <li>
+                              Les données commencent <strong>30 jours</strong> avant la fin de la validation, et elles finissent
+                              à la fin des données connues.
+                            </li>
+                            <li>
+                              L'objectif de ces diagrammes est de surveiller la <strong>dérive</strong> - une baisse de performance
+                              dans le temps. On peut se servir de cet indicateur pour décider quand on devrait reformer le modèle
+                              avec les données nouvelles.
+                            </li>
+                            <li>
+                              On utilise MAE au lieu du Pourcentage d'Erreur Absolue Moyen (MAPE) parce que dans les cas de certains
+                              polluants (surtout SO2) dont leurs concentrations sont près de zéro, la valeur MAPE peut être très élevé
+                              et par conséquent <strong>dénuee de sens</strong>.
+                            </li>
+                          </ul>
+                        </div>
+
+                      </div>
+
+                      <div class="content">
+                        <img class="plot plot--wide lang--en" src="{{ url_mae_en_wide }}">
+                        <img class="plot plot--wide lang--fr" src="{{ url_mae_fr_wide }}">
+                        <img class="plot plot--narrow lang--en" src="{{ url_mae_en_narrow }}">
+                        <img class="plot plot--narrow lang--fr" src="{{ url_mae_fr_narrow }}">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+          </ul> <!-- .cd-hero-slider -->
+        </section> <!-- .cd-hero -->
+
+
+        <footer>
+          <p>Copyright &copy; 2022 <a href="https://www.sneezingtrees.com" target="_blank">Sneezing Trees</a>
+        </footer>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="/static/js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
+
+        <script src="{{ url_for('static', filename='js/vendor/bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/prediction.js') }}"></script>
+
+    </body>
+</html>
