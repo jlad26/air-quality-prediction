@@ -1,4 +1,5 @@
-"""Module for managing Air Quality models.
+"""Module for the Air Quality model, which is a wrapper to the
+models of the Darts library.
 """
 
 import os
@@ -19,13 +20,68 @@ from torch import nn
 import air_quality.constants as C
 
 class Model:
-    """Class for Air Quality model.
+    """Warpper for a model from the Darts library.
 
-    Attributes
-    ----------
-    target_series: Dictionary of sequences of darts timeseries with keys of
-        'train', 'val', 'train_val.
+    This is a wrapper for a model from the Darts library which allows
+    a standardized usage of those models.
 
+    Attributes:
+        MODELS_DIR_PATH: String of the path to the directory holding the file
+            'Models parameters.csv' that contains the parameters of models.
+        models_attributes: Pandas dataframe containing parameters of models
+            read from the file 'Models parameters.csv'.
+        MODEL_CHOICE_PARAMS: List of parameters that are not set in the file 'Models
+            parameters.csv' but are set on initialising an instance.
+        init_params: Dictionary of arguments used when creating this instance of model.
+        model_name: Model name as a string
+        target_series_names: List of the names of the target series to be trained on.
+        forecast_horizon: Integer number of time steps for which the model will predict.
+        quantiles: List of floats representing the quantiles to be used in quantile regression.
+        probabilistic_num_samples: Integer number of samples to be used in probabilistic
+            forecasting.
+        max_epochs: Integer maximum number of epochs for training.
+        early_stopper_patience: Integer number of epochs to train for without improvement
+            before stopping.
+        log_tensorboard: Boolean of whether to log to tensorboard.
+        target_series: List of the training components of the scaled target series, each
+            a Darts timeseries.
+        target_series_unscaled: List of the training components of the unscaled target series,
+            each a Darts timeseries.
+        val_series: List of the validation components of the scaled target series, each
+            a Darts timeseries.
+        val_series_unscaled: List of the training components of the unscaled target series,
+            each a Darts timeseries.
+        target_series_train_val: List of the combined training and validation components
+            of the scaled target series, each a Darts timeseries.
+        target_series_train_val_unscaled: List of the combined training and validation components
+            of the unscaled target series, each a Darts timeseries.
+        target_scalers: List of scalers that were used to scale the target series, in the
+            same order as the lists of target series timeseries. In other words, the first
+            scaler was used to scale the first in the list of target_series, and so on.
+        train_val_data_start: Pandas timestamp of the start of validation.
+        train_val_data_end: Pandas timestamp of the end of validation.
+        train_data_end: Pandas timestamp of the end of training.
+        additional_model_info: Dictionary of additional choices, being:
+            training_type: String of either 'VAL', 'TEST', or 'PROD' to indicate training
+                mode.
+            covariates_types: List containing any one, both or neither of 'past' and 'future'.
+            feature_covariates : List containing any one, both or neither of 'time' and 'data'.
+        saved_model_name: A string concatenation of various model attributes.
+        model_args: Dictionary of model arguments used to create the arguments for creating
+            the Darts model instance.
+        is_torch_forecasting_model: Boolean indicating whether model is a Torch forecasting
+            model (as defined by the Darts library).
+        is_global_forecasting_model: Boolean indicating whether model is a Global forecasting
+            model (as defined by the Darts library).
+        darts_model: A Darts model object.
+        training_args: A dictionary of arguments used when training the model.
+        past_covariates: List of Darts timeseries representing the past covariates.
+            List is ordered to correpond with the order of target series.
+        future_covariates: List of Darts timeseries representing the future covariates.
+            List is ordered to correpond with the order of target series.
+        covariates_scalers: A dictionary of scalers with two keys 'past' and 'future,
+            each containing a list of scalers used to scale the covariates timeseries.
+            The lists are ordered to correspond to the lists of covariate timeseries.
     """
 
     MODELS_DIR_PATH = os.path.join(C.WORK_DIR, 'Models parameters')
@@ -85,7 +141,7 @@ class Model:
             self.create_model_dir(model_save_path)
 
         # Set the target timeseries components and scalers.
-        self.set_target_series_components(target_series, target_series_unscaled)
+        self._set_target_series_components(target_series, target_series_unscaled)
         self.target_scalers = target_scalers
 
         # Set start and end times of dataset.
@@ -108,12 +164,12 @@ class Model:
             'lags_future_covariates' in self.model_args and
             self.model_args['lags_future_covariates']
         ):
-            self.shorten_target_series_by_forecast_horizon()
+            self._shorten_target_series_by_forecast_horizon()
 
-        self.is_torch_forecasting_model = self.check_if_torch_forecasting_model(
+        self.is_torch_forecasting_model = self._check_if_torch_forecasting_model(
             self.model_args['Class']
         )
-        self.is_global_forecasting_model = self.check_if_global_forecasting_model()
+        self.is_global_forecasting_model = self._check_if_global_forecasting_model()
 
         self.darts_model = None
         self.training_args = None
@@ -122,7 +178,7 @@ class Model:
 
         # Initialise the darts model.
         if is_new_model:
-            self.init_darts_model(past_covariates, future_covariates)
+            self._init_darts_model(past_covariates, future_covariates)
 
             # Set covariates series. We do this after the initialisation of the darts model
             # so we can check which covariates are supported.
@@ -130,7 +186,7 @@ class Model:
             self.future_covariates = None
             self.set_covariates(past_covariates, future_covariates)
 
-        self.set_training_args()
+        self._set_training_args()
 
 
     def get_init_params(self, params):
@@ -156,6 +212,14 @@ class Model:
 
     @staticmethod
     def load_model(dir_path):
+        """Loads an instance of this class.
+
+        Args:
+            dir_path: String of path to the folder containing the saved model.
+
+        Returns:
+            The loaded model instance.
+        """
 
         # Load the init parameters and arguments for the saved model.
         init_params_path = os.path.join(dir_path, 'model_init_params.pkl')
@@ -183,7 +247,7 @@ class Model:
         )
 
         # Set the trainin args.
-        loaded_model.set_training_args()
+        loaded_model._set_training_args()
 
         # Set the model_save_path to the current location in case the folder has been moved.
         # Also reset the darts model work_dir accordingly if necessary.
@@ -192,11 +256,11 @@ class Model:
         # model so we can't just reset it here.
         loaded_model.model_save_path = dir_path
         if loaded_model.is_torch_forecasting_model:
-            loaded_model.darts_model.work_dir = loaded_model.get_working_dir()
+            loaded_model.darts_model.work_dir = loaded_model._get_working_dir()
 
         return loaded_model
 
-    def set_target_series_components(self, target_series, target_series_unscaled):
+    def _set_target_series_components(self, target_series, target_series_unscaled):
 
         # Training
         self.target_series = target_series['train']
@@ -211,7 +275,7 @@ class Model:
         self.target_series_train_val_unscaled = target_series_unscaled['train_val']
 
 
-    def shorten_target_series_by_forecast_horizon(self):
+    def _shorten_target_series_by_forecast_horizon(self):
         """Set the target series components, in each case removing a chunk at the
         end equivalent to the forecast horizon.
         """
@@ -221,18 +285,15 @@ class Model:
         self.target_series_unscaled = self.slice_ts_sequence(
             self.target_series_unscaled, 0, -self.forecast_horizon)
 
-        # self.val_series = self.slice_ts_sequence(
-        #     self.val_series, 0, -self.forecast_horizon)
-        # self.val_series_unscaled = self.slice_ts_sequence(
-        #     self.val_series_unscaled, 0, -self.forecast_horizon)
-
-        # self.target_series_train_val = self.slice_ts_sequence(
-        #     self.target_series_train_val, 0, -self.forecast_horizon)
-        # self.target_series_train_val_unscaled = self.slice_ts_sequence(
-        #     self.target_series_train_val_unscaled, 0, -self.forecast_horizon)
-
 
     def get_model_choices(self):
+        """Gets the model choices for this model (i.e., those
+        parameters that define the model that aren't defined by the
+        model type in the file 'Models parameters.csv').
+
+        Returns:
+            Dictionary of the model choices.
+        """
         choices = {}
         for param in self.MODEL_CHOICE_PARAMS:
             choices[param] = getattr(self, param)
@@ -241,6 +302,11 @@ class Model:
 
     @property
     def uses_past_covariates(self):
+        """Whether the Darts model uses past covariates.
+
+        Returns:
+            Boolean.
+        """
         if not hasattr(self.darts_model, 'uses_past_covariates'):
             return False
 
@@ -248,6 +314,11 @@ class Model:
 
     @property
     def uses_future_covariates(self):
+        """Whether the Darts model uses future covariates.
+
+        Returns:
+            Boolean.
+        """
         if not hasattr(self.darts_model, 'uses_future_covariates'):
             return False
 
@@ -255,14 +326,24 @@ class Model:
 
 
     def get_past_covariates_features(self):
-        return self.get_ts_sequence_features(self.past_covariates)
+        """Gets a list of the past covariates features used by this model.
+
+        Returns:
+            List of strings that identify the past covariates features.
+        """
+        return self._get_ts_sequence_features(self.past_covariates)
 
 
     def get_future_covariates_features(self):
-        return self.get_ts_sequence_features(self.future_covariates)
+        """Gets a list of the future covariates features used by this model.
+
+        Returns:
+            List of strings that identify the future covariates features.
+        """
+        return self._get_ts_sequence_features(self.future_covariates)
 
 
-    def get_ts_sequence_features(self, ts_sequence):
+    def _get_ts_sequence_features(self, ts_sequence):
 
         if ts_sequence is None:
             return None
@@ -271,7 +352,7 @@ class Model:
         return single_ts_sequence.columns.to_list()
 
     def get_model_args(self):
-        """Retrieves the specified arguments of this model as defined by the model name.
+        """Retrieves the specified arguments of this model.
 
         Returns:
             A dictionary of the model arguments.
@@ -296,7 +377,7 @@ class Model:
             model_args[attribute] = attr_val
 
             # For torch models only, add in log_tensorboard and save_checkpoints if appropriate.
-            if self.check_if_torch_forecasting_model(model_args['Class']):
+            if self._check_if_torch_forecasting_model(model_args['Class']):
                 model_args['log_tensorboard'] = self.log_tensorboard
 
                 # We don't save checkpoints if we aren't validating.
@@ -342,31 +423,41 @@ class Model:
         return saved_model_name
 
 
-    def check_if_torch_forecasting_model(self, model_class):
+    def _check_if_torch_forecasting_model(self, model_class):
         return issubclass(globals()[model_class], TorchForecastingModel)
 
 
-    def check_if_global_forecasting_model(self):
+    def _check_if_global_forecasting_model(self):
         model_class = globals()[self.model_args['Class']]
         return issubclass(model_class, GlobalForecastingModel)
 
 
     @property
     def is_probabilistic(self):
+        """Whether the Darts model is a probabilistic model.
+
+        Returns:
+            Boolean.
+        """
         model_class = globals()[self.model_args['Class']]
         return hasattr(model_class, 'likelihood')
 
     @property
     def has_output_chunk_length_param(self):
+        """Whether the Darts class for this model has the parameter 'output_chunk_length'.
+
+        Returns:
+            Boolean.
+        """
         model_class = globals()[self.model_args['Class']]
         return hasattr(model_class, 'output_chunk_length')
 
 
-    def get_working_dir(self):
+    def _get_working_dir(self):
         return f"{self.model_save_path}"
 
 
-    def init_darts_model(self, past_covariates, future_covariates):
+    def _init_darts_model(self, past_covariates, future_covariates):
 
         # Create model args skipping any that must be converted or used only in training.
         darts_model_args = self.model_args.copy()
@@ -385,12 +476,13 @@ class Model:
         if self.is_torch_forecasting_model:
             darts_model_args['n_epochs'] = self.max_epochs
             darts_model_args['model_name'] = self.saved_model_name
-            darts_model_args['work_dir'] = self.get_working_dir()
+            darts_model_args['work_dir'] = self._get_working_dir()
 
-        # Handle conversion of model args where required.
+        # Add in output chunk length if model can handle it.
         if self.has_output_chunk_length_param:
             darts_model_args['output_chunk_length'] = self.forecast_horizon
 
+        # Convert learning rate argument to format for Darts model.
         if 'learning_rate' in self.model_args:
             darts_model_args['optimizer_kwargs'] = {'lr': self.model_args['learning_rate']}
 
@@ -412,13 +504,14 @@ class Model:
             early_stopper = EarlyStopping(**early_stopper_params)
             checkpointer = ModelCheckpoint(
                 monitor = monitor,
-                dirpath = os.path.join(self.get_working_dir(), self.saved_model_name, 'checkpoints'),
+                dirpath = os.path.join(self._get_working_dir(), self.saved_model_name, 'checkpoints'),
                 filename= 'custom-stop-{epoch}-{val_loss:.4f}-{' + monitor + ':.4f}'
             )
             darts_model_args['pl_trainer_kwargs'] = {'callbacks' : [early_stopper, checkpointer]}
             if self.model_args['early_stopper'] != 'loss':
                 darts_model_args['torch_metrics'] = globals()[self.model_args['early_stopper']]()
 
+        # Set the probabilistic parameters as required.
         if self.is_probabilistic:
             if self.model_args['likelihood'] == 'Deterministic':
                 darts_model_args['likelihood'] = None
@@ -429,7 +522,7 @@ class Model:
                 raise ValueError(
                     'If specified, likelihood must be "Deterministic" or "Probabilistic"')
 
-        # TODO. This is a really hacky way of preventing checking whether
+        # TODO. This is a really hacky way of avoiding checking whether
         # past covariates are set. The problem is that we can't set
         # self.past_covariates and self.future_covariates until after
         # the darts model has been initialised because otherwise we
@@ -454,12 +547,12 @@ class Model:
                 self.forecast_horizon
             )
 
+        # Create the Darts model instance.
         model_class = globals()[self.model_args['Class']]
-
         self.darts_model = model_class(**darts_model_args)
 
 
-    def maybe_convert_ts_to_list(self, ts_sequence):
+    def _maybe_convert_ts_to_list(self, ts_sequence):
         """Converts ts_sequence to a list when ts_sequence is not a
         list but a timeseries.
         """
@@ -469,7 +562,7 @@ class Model:
         return ts_sequence
 
 
-    def set_training_args(self):
+    def _set_training_args(self):
 
         # Check that the model handle can multiple series if necessary.
         if not self.is_global_forecasting_model:
@@ -505,7 +598,7 @@ class Model:
         # Convert any timeseries sequence with only one timeseries to a single timeseries
         # as some models don't accept sequences.
         training_args = {
-            k : self.maybe_convert_ts_sequence_to_ts(ts) for k, ts in training_args.items()
+            k : self._maybe_convert_ts_sequence_to_ts(ts) for k, ts in training_args.items()
         }
 
         # Set verbose argument.
@@ -515,12 +608,13 @@ class Model:
         self.training_args = training_args
 
 
-    def get_target_series_unscaled(self, predict_series = ''):
+    def _get_target_series_unscaled(self, predict_series = ''):
         pred_ts_seq_index = self.target_series_names.index(predict_series) if predict_series else 0
         return self.target_series_train_val_unscaled[pred_ts_seq_index]
 
 
     def train_and_save(self):
+        """Train the Darts model and save the trained model."""
 
         self.darts_model.fit(
             **self.training_args
@@ -536,7 +630,7 @@ class Model:
         self.darts_model.save(os.path.join(self.model_save_path, 'darts_model'))
 
 
-    def maybe_convert_ts_sequence_to_ts(self, ts):
+    def _maybe_convert_ts_sequence_to_ts(self, ts):
         if isinstance(ts, list):
             if len(ts) == 1:
                 ts = ts[0]
@@ -544,9 +638,22 @@ class Model:
 
 
     def get_best_darts_model(self, val_loss_monitor = False):
+        """Gets the best saved Darts model.
 
+        The default metric used during training is val_loss. However this
+        can be changed to a custom metric in the file 'Models parameters.csv'.
+        The val_loss_monitor parameter is used to determine whether to
+        retrieve the best model as determined by the default metric or as
+        determined by the custom metric.
+
+        Args:
+            val_loss_monitor: Boolean of whether to use the default val_loss metric.
+
+        Returns:
+            A Darts model instance.
+        """
         if val_loss_monitor:
-            return self.get_best_val_loss_darts_model()
+            return self._get_best_val_loss_darts_model()
 
         model = self.darts_model
         # If this class of model doesn't store checkpoints then just use current model as is.
@@ -558,7 +665,7 @@ class Model:
             return model
 
         # Now let's check if we have a "custom" saved checkpoint.
-        base_path = os.path.join(self.get_working_dir(), self.saved_model_name, 'checkpoints')
+        base_path = os.path.join(self._get_working_dir(), self.saved_model_name, 'checkpoints')
         if os.path.isdir(base_path):
             filenames = os.listdir(base_path)
             checkpoint_filename = None
@@ -570,15 +677,15 @@ class Model:
                 return model.load_from_checkpoint(
                     self.saved_model_name,
                     file_name = checkpoint_filename,
-                    work_dir = self.get_working_dir()
+                    work_dir = self._get_working_dir()
                 )
 
         # Since we don't have "custom" saved checkpoint we'll load the standard
         # best checkpoint (determined by val_loss)
-        return self.get_best_val_loss_darts_model()
+        return self._get_best_val_loss_darts_model()
 
 
-    def get_best_val_loss_darts_model(self):
+    def _get_best_val_loss_darts_model(self):
 
         model = self.darts_model
 
@@ -587,25 +694,30 @@ class Model:
             return model
 
         # Equally if we don't have any checkpoints then just use current model.
-        if not os.path.exists(os.path.join(self.get_working_dir(), self.saved_model_name, 'checkpoints')):
+        if not os.path.exists(os.path.join(self._get_working_dir(), self.saved_model_name, 'checkpoints')):
             return model
 
         return model.load_from_checkpoint(
             self.saved_model_name,
-            work_dir = self.get_working_dir(),
+            work_dir = self._get_working_dir(),
             best = True
         )
 
 
     def get_tensorboard_log_dir(self):
-        return os.path.join(self.get_working_dir(), self.saved_model_name, 'logs')
+        """Gets the path to the directory where tensorboard logs are stored.
+
+        Returns:
+            String of the path to the directory.
+        """
+        return os.path.join(self._get_working_dir(), self.saved_model_name, 'logs')
 
 
-    def get_validation_series_length(self):
+    def _get_validation_series_length(self):
         if not self.val_series:
             return 0
 
-        val_series = self.maybe_convert_ts_to_list(self.val_series)
+        val_series = self._maybe_convert_ts_to_list(self.val_series)
         return len(val_series[0])
 
 
@@ -617,6 +729,24 @@ class Model:
         past_covariates = None,
         future_covariates = None
     ):
+        """Gets a forecast of the target series.
+
+        Args:
+            darts_model: A Darts model instance. If not provided, the Darts model
+                saved at the end of training will be used. Usually a "best" model is
+                provided instead.
+            series: A Darts timeseries or a list of Darts timeseries. The forecast(s) begins
+                at the end of the provided series. If none is provided, the series used for
+                training is used.
+            forecast_horizon: Integer number of time steps to forecast.
+            past_covariates: A Darts timeseries or a list of Darts timeseries of the past
+                covariates to be used in prediction.
+            future_covariates: A Darts timeseries or a list of Darts timeseries of the future
+                covariates to be used in prediction.
+
+        Returns:
+            Prediction(s) in the form of a Darts timeseries or a list of Darts timeseries.
+        """
 
         predict_args = {}
 
@@ -632,7 +762,7 @@ class Model:
 
         # Convert covariates to a single timeseries if we have a sequence with only one timeseries.
         predict_args = {
-            k : self.maybe_convert_ts_sequence_to_ts(ts) for k, ts in predict_args.items()
+            k : self._maybe_convert_ts_sequence_to_ts(ts) for k, ts in predict_args.items()
         }
 
         predict_args['n'] = forecast_horizon
@@ -672,6 +802,30 @@ class Model:
         start : str = '',
         end : str = '',
     ):
+        """Gets historical forecast(s).
+
+        Args:
+            target_series: A Darts timeseries or a list of Darts timeseriess, representing
+                the history of the target series whose future is to be predicted. If a list
+                is provided, the target series is set using the predict_series parameter.
+                If target_series is not specified the method returns the forecast of the
+                training series.
+            predict_series: A string representing which target series to predict. Only
+                required if a list of timeseries is provided as target_series.
+            darts_model: A Darts model instance. If not provided, the Darts model
+                saved at the end of training will be used. Usually a "best" model is
+                provided instead.
+            start: A date as a string in the form yyyy-mm-dd, representing from when
+                the historical forecasts should start. If not specified, the earliest
+                possible point of the target series will be used (which depends on
+                the input chunk length of the model).
+            end: A date as a string in the form yyyy-mm-dd, representing when the historical
+                forecasts should end. If not specified, the end of the target series
+                will be used.
+
+        Returns:
+            A list of Darts timeseries.
+        """
 
         # Each sequence of timeseries has the same order so we set the index to
         # use for the pollutant we are backtesting.
@@ -717,7 +871,7 @@ class Model:
 
         # Convert covariates to a single timeseries if we have a sequence with only one timeseries.
         cov_hf_args = {
-            k : self.maybe_convert_ts_sequence_to_ts(ts) for k, ts in cov_hf_args.items()
+            k : self._maybe_convert_ts_sequence_to_ts(ts) for k, ts in cov_hf_args.items()
         }
 
         # Combine all historical forecast args.
@@ -738,6 +892,20 @@ class Model:
         start,
         end
     ):
+        """Gets a subset of a list of the (chronologically ordered) historical forecasts.
+
+        The first historical forecast is that in which the specified start date is found, and
+        the last historical forecast is that in which the specified end date is found.
+
+        Args:
+            historical_forecasts: A list of Darts timeseries, being the chronologically
+                ordered forecasts.
+            start: Start date as a string in the form yyyy-mm-dd
+            end: End date as a string in the form yyyy-mm-dd
+
+        Returns:
+            Forecasts as a list of Darts timeseries.
+        """
 
         start = pd.to_datetime(start)
         end = pd.to_datetime(end)
@@ -759,13 +927,23 @@ class Model:
         figsize = (16, 8),
         title = ''
     ):
+        """Plots forecasts.
+
+        Args:
+            forecasts: Darts timeseries or a list of Darts timeseries, each representing
+                a different item being forecasted.
+            predict_series: A string indicating which item should be forecasted if several
+                have been provided.
+            figsize: A tuple representing figure size to be passed to Matplotlib.
+            title: A string to be used as the plot title.
+        """
 
         # If we have been given a single forecast timeseries, convert to a list.
         if not isinstance(forecasts, list):
             forecasts = [forecasts]
 
         # Get the actual series to compare with.
-        actual_series = self.get_target_series_unscaled(predict_series)
+        actual_series = self._get_target_series_unscaled(predict_series)
         actual_series_slice = actual_series.slice(
             forecasts[0].start_time(),
             forecasts[-1].end_time()
@@ -786,6 +964,15 @@ class Model:
         figsize = (16, 8),
         title = ''
     ):
+        """Plot forecast(s) against actual if provided.
+
+        Args:
+            forecasts: A forecast or a list of forecasts as Darts timeseries.
+            actual_series: A Darts timeseries representing known data.
+            figsize: A tuple representing figure size to be passed to Matplotlib.
+            title: A string to be used as the plot title.
+
+        """
         plt.figure(figsize=figsize)
 
         if actual_series:
@@ -810,13 +997,38 @@ class Model:
         predict_series = '',
         output_type = 'both'
     ):
+        """Gets performance metrics for forecast by comparing with the model target
+        series data.
+
+        If several chronological forecasts are provided, then the metric for each forecast is
+        provided, as well as an aggregate mean result for all forecasts.
+
+        Args:
+            forecasts: A forecast or a list of forecasts as Darts timeseries.
+            metrics: A list of strings, containing one, both or neither of 'MAPE'
+                and 'MAE'.
+            predict_series: A string indicating for which item metrics should be
+            calculated if several have been provided.
+
+        Returns:
+            A dictionary of the form {
+                'mape' : {
+                    'individual' : A list of values,
+                    'aggregate' : The single aggregate value.
+                },
+                'mae' : {
+                    'individual' : A list of values,
+                    'aggregate' : The single aggregate value.
+                }
+            }
+        """
 
         # Covert forecasts to a list if we are given a single timeseries.
         if not isinstance(forecasts, list):
             forecasts = [forecasts]
 
         # Get the actual series to compare with.
-        target_series = self.get_target_series_unscaled(predict_series)
+        target_series = self._get_target_series_unscaled(predict_series)
         target_series = [target_series] * len(forecasts)
 
         output = {}
@@ -848,6 +1060,20 @@ class Model:
 
 
     def get_validation_period_forecast(self, darts_model = None):
+        """Gets a forecast for the whole validation period.
+
+        Args:
+            darts_model: A Darts model instance. If not provided, the Darts model
+                saved at the end of training will be used. Usually a "best" model is
+                provided instead.
+
+        Returns:
+            Prediction(s) in the form of a Darts timeseries or a list of Darts timeseries.
+
+        Raises:
+            ValueError if the model has no validation data (most likely because it is
+            being run in production mode).
+        """
 
         # We can't run determine the period if we don't have a validation period.
         if self.val_series is None:
@@ -859,7 +1085,7 @@ class Model:
         # Set forecast horizon to cover whole validation period.
 
         get_predicted_series_kwargs = {
-            'forecast_horizon' : self.get_validation_series_length(),
+            'forecast_horizon' : self._get_validation_series_length(),
         }
 
         # Specify the sequence of target series we are predicting if we have more
@@ -877,6 +1103,13 @@ class Model:
 
 
     def slice_ts_sequence(self, ts_sequence, start, end):
+        """Gets a slice of each Darts timeseries in a list of Darts timeseries.
+
+        Args:
+            ts_sequence: A list of Darts timeseries.
+            start: An integer representing the time step to start the slice.
+            end: An integer representing the time step to end the slice.
+        """
         if ts_sequence is None:
             return None
 
