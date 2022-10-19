@@ -698,6 +698,7 @@ def get_key_times():
     key_times = {
         'train_start_time' : train_start_time,
         'train_end_time' : train_end_time,
+        'last_3_training' : train_end_time - pd.Timedelta(2, 'days'),
         'validation_end_time' : validation_end_time,
         'actual_end_time' : actual_end_time,
         'last_forecast_start' : last_forecast_start,

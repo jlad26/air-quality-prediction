@@ -17,18 +17,9 @@
     const keyDates = {}
     const keyDatesInputs = document.querySelectorAll('.key-dates-values input')
     keyDatesInputs.forEach(function(input) {
-        keyDates[input.id] = new Date(input.value);
+        const datetimeStr = input.value.slice(0, 10);
+        keyDates[input.id] = datetimeStr;
     });
-    keyDates['last_3_training'] = new Date(keyDates['train_end_time'])
-    keyDates['last_3_training'].setDate(keyDates['last_3_training'].getDate() - 2)
-
-    // Convert to string in the format yyyy-mm-dd
-    for (const [key, value] of Object.entries(keyDates)) {
-        const offset = value.getTimezoneOffset()
-        const date = new Date(value.getTime() - (offset*60*1000))
-        keyDates[key] = date.toISOString().split('T')[0]
-    }
-
 
     /*================================================================*/
     /* Language */
