@@ -26,7 +26,6 @@ from meteostat import Hourly
 class DataUpdater:
 
     LOG_DIR_PATH = os.path.join(C.WORK_DIR, 'logs')
-    UPDATE_LOG_PATH = os.path.join(LOG_DIR_PATH, 'last-update.txt')
 
     CACHE_DIR_PATH = os.path.join(C.WORK_DIR, 'cache')
     KEY_TIMES_PATH = os.path.join(CACHE_DIR_PATH, 'key-times.pkl')
