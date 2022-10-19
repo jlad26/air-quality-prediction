@@ -24,6 +24,14 @@ from meteostat import Hourly
 
 
 class DataUpdater:
+    """For executing the updates of various stored data.
+
+    Attributes:
+        LOG_DIR_PATH: String of path to logs directory.
+        CACHE_DIR_PATH: String of path to cache folder.
+        KEY_TIMES_PATH: String of path to 'key-times.pkl' file in cache folder.
+        TZ: String of timezone.
+    """
 
     LOG_DIR_PATH = os.path.join(C.WORK_DIR, 'logs')
 
@@ -32,22 +40,35 @@ class DataUpdater:
 
     TZ = 'Europe/Paris'
 
-    def init_cache(self):
+    def _init_cache(self):
         if not os.path.exists(self.CACHE_DIR_PATH):
             os.makedirs(self.CACHE_DIR_PATH)
 
     def cache_key_times(self, key_times):
-        self.init_cache()
+        """Caches key times in a pickle format in the cache folder.
+
+        Args:
+            key_times: Dictionary of key times.
+        """
+
+        self._init_cache()
         with open(self.KEY_TIMES_PATH, 'wb') as file:
             pickle.dump(key_times, file)
 
 
     def clear_key_times_cache(self):
+        """Empties the key times cache by deleting the file in the cache folder."""
+
         if os.path.exists(self.KEY_TIMES_PATH):
             os.remove(self.KEY_TIMES_PATH)
 
 
     def fetch_cached_key_times(self):
+        """Gets the cached key times if they exist.
+
+        Returns:
+            None if not cached, otherwise the key times as a dictionary.
+        """
         if not os.path.exists(self.KEY_TIMES_PATH):
             return None
 
@@ -55,9 +76,13 @@ class DataUpdater:
             return pickle.load(file)
 
 
-    def create_temp_data(self):
+    def _create_temp_data(self):
+        """Copies existing data into a temporary folder so we can update it
+        without affecting the live use of the data. (Once update is complete
+        the updated temp data overwrites the existing data.)
+        """
 
-        self.clear_temp_data()
+        self._clear_temp_data()
 
         dm = DataManager()
         src_path = dm.EXISTING_DATA_PATH
@@ -66,7 +91,9 @@ class DataUpdater:
         shutil.copytree(src_path, dest_path)
 
 
-    def copy_temp_data_to_live(self):
+    def _copy_temp_data_to_live(self):
+        """Copies updated data to live."""
+
         dm = DataManager()
         dest_path = dm.EXISTING_DATA_PATH
         src_path = os.path.join(dest_path, 'temp')
@@ -77,7 +104,7 @@ class DataUpdater:
                 shutil.copy2(os.path.join(src_path, fname), dest_path)
 
 
-    def clear_temp_data(self):
+    def _clear_temp_data(self):
         dm = DataManager()
         src_path = dm.EXISTING_DATA_PATH
         dest_path = os.path.join(src_path, 'temp')
@@ -86,6 +113,13 @@ class DataUpdater:
 
 
     def hit_home_page(self):
+        """Send a GET request to the home page.
+
+        Used to trigger the production of the home page plot after an update.
+
+        Returns:
+            http response code as integer.
+        """
         home_url = C.ENV_VARS['HOME_URL']
         print(home_url)
         response = requests.request("GET", home_url)
@@ -93,6 +127,7 @@ class DataUpdater:
 
 
     def update_all(self):
+        """Updates all stored data, logging any error messages."""
 
         logger = aqlogging.setup_logger(
             name = 'General update',
@@ -103,7 +138,7 @@ class DataUpdater:
         try:
 
             # Copy existing data files to temp folder for update
-            self.create_temp_data()
+            self._create_temp_data()
 
             weather_forecast_dm = WeatherForecastDataManager()
             weather_forecast_dm.update_current_data()
@@ -114,9 +149,9 @@ class DataUpdater:
             air_quality_dm = AirQualityDataManager()
             air_quality_dm.update_to_yesterday()
 
-            self.copy_temp_data_to_live()
+            self._copy_temp_data_to_live()
 
-            self.clear_temp_data()
+            self._clear_temp_data()
 
         except Exception as e:
 
@@ -131,7 +166,15 @@ class DataUpdater:
             if C.ENV_VARS['DEBUG']:
                 raise Exception(e) from e
 
+
     def refresh_metrics(self):
+        """Sends a GET request to the API for refreshing the metrics data.
+
+        Returns:
+            A tuple of the response code as integer and the text of the response
+            as string.
+        """
+
         url = f"{C.ENV_VARS['HOME_URL']}refresh-metrics"
         query_string = {
             'key' : C.ENV_VARS['CACHE_CLEAR_KEY']
@@ -142,6 +185,23 @@ class DataUpdater:
 
 class DataManager:
     """Parent class for managaing data for the Air Quality predictor.
+
+    Attributes:
+        PREDICTION_EARLIEST_START: String of earliest date possible for forecast in the
+            format yyyy-mm-dd.
+        EXISTING_DATA_PATH: Path to the directory containing the existing data.
+        EXISTING_DATA_FILENAME: Name of the file containing the existing data. Set by
+            subclass.
+        BASE_BACKUPS_PATH: String of path to the directory where all backups of downloaded
+            data are stored.
+        LOCATIONS_COORDS: Dictionary containing GPS coordinates for Montpellier and Marseille.
+        WEATHER_VARS: List of the variable to be retrieved by API.
+        TZ: String of timezone.
+        logger: A logger instance from the Python logging module. Set by subclass.
+        existing_data: A Pandas dataframe containing the existing data.
+        temp_existing_data: A Pandas dataframe containing the temporary existing data. This
+            is a copy of the existing data that is updated with new data before overwriting
+            the stored existing data.
     """
 
     PREDICTION_EARLIEST_START = '2014-01-01'
@@ -181,7 +241,8 @@ class DataManager:
         self.temp_existing_data = None
 
 
-    def handle_error(self, e : Exception, message : str = ''):
+    def _handle_error(self, e : Exception, message : str = ''):
+        """Used in the Except clause of a try - except pattern to log error messages."""
 
         tb_str = "".join(traceback.format_tb(e.__traceback__))
 
@@ -197,6 +258,14 @@ class DataManager:
 
 
     def get_existing_data_df(self, temp = False):
+        """Gets the existing stored data, either the live version or the temporary.
+
+        Args:
+            temp: Boolean of whether to return the temporary existing data.
+
+        Returns:
+            A Pandas dataframe of the existing data (live or temporary).
+        """
 
         if temp:
 
@@ -218,6 +287,12 @@ class DataManager:
 
 
     def save_existing_data_df(self, df, temp = False):
+        """Saves data as existing data.
+
+        Args:
+            df: Pandas dataframe to be saved.
+            temp: Boolean of whether to save as temporary existing data instead of live.
+        """
 
         if temp:
 
@@ -235,35 +310,57 @@ class DataManager:
 
 
     def get_existing_data_last_time(self, temp = False):
+        """Gets tbe last timestamp of the existing data (live or temporary).
+
+        Args:
+            temp: Boolean of whether to use the temporary existing data instead of live.
+
+        Returns:
+            Pandas timestamp.
+        """
+
         existing_data_df = self.get_existing_data_df(temp)
         return existing_data_df['Datetime'].max()
 
 
     def get_next_day_to_fetch(self, temp = False):
+        """Gets the date of the next that should be fetched to update existing data.
+
+        In effect the date returned is the date of the day following the last day of
+        the existing data.
+
+        Args:
+            temp: Boolean of whether to use the temporary existing data instead of live.
+
+        Returns:
+            datetime.date object.
+        """
+
         existing_data_last_time = self.get_existing_data_last_time(temp).date()
         return existing_data_last_time + pd.Timedelta(1, 'day')
 
 
-    def previous_days_data_exists(self, date : str, temp : bool = False):
+    def _previous_days_data_exists(self, date : str, temp : bool = False):
         existing_data_last_time = self.get_existing_data_last_time(temp)
         previous_day_last_datetime = pd.to_datetime(f"{date} 23:00:00") - pd.Timedelta(1, 'day')
         return previous_day_last_datetime <= existing_data_last_time
 
 
-    def get_api_response(self, api_url : str, query_params : dict, headers : dict = None):
+    def _get_api_response(self, api_url : str, query_params : dict, headers : dict = None):
         return requests.request("GET", api_url, params = query_params, headers = headers)
 
 
-    def get_api_json_reponse(self, api_url : str, query_params : dict, headers : dict = None):
-        response = self.get_api_response(api_url, query_params, headers)
+    def _get_api_json_reponse(self, api_url : str, query_params : dict, headers : dict = None):
+        response = self._get_api_response(api_url, query_params, headers)
         return json.loads(response.text)
 
 
-    def today(self):
+    def _today(self):
         return pd.Timestamp.today(self.TZ).date()
 
 
-    def fill_missing_values(self, dataframe : pd.DataFrame):
+    def _fill_missing_values(self, dataframe : pd.DataFrame):
+        """"Fills NaN values using linear interpolation followed by forward fill."""
 
         # The first column is a category for the data - either 'location' or 'Polluant'.
         # So we divide our dataframe up by the category column before interpolating.
@@ -302,8 +399,16 @@ class DataManager:
         return filled_df
 
 class WeatherForecastDataManager(DataManager):
+    """For downloading, cleaning and updating weather forecast data.
 
-    # Path to the current weather forecast data.
+    Attributes:
+        EXISTING_DATA_FILENAME: String of filename of the current weather forecast data.
+        LOGS_PATH: String of path to the log file.
+        API_URL: String of API url for fetching data.
+        LOCATIONS: List of locations for which data must be fetched.
+        DATA_COLUMNS: List of the types of data that must be fetched.
+    """
+
     EXISTING_DATA_FILENAME = 'Processed weather forecast data'
 
     LOGS_PATH = os.path.join(C.WORK_DIR, 'logs', 'weather-forecast-update.log')
@@ -332,6 +437,14 @@ class WeatherForecastDataManager(DataManager):
 
 
     def get_last_date_current_data(self, temp = False):
+        """Gets the last date of the stored existing data (live or temporary).
+
+        Args:
+            temp: Boolean of whether to use the temporary existing data instead of live.
+
+        Returns:
+            datatime.date object.
+        """
 
         current_data = self.get_existing_data_df(temp)
 
@@ -344,7 +457,7 @@ class WeatherForecastDataManager(DataManager):
         return min(last_dates).date()
 
 
-    def fetch_data(self, start : str, end : str):
+    def _fetch_data(self, start : str, end : str):
 
         # We add the hourly weather variables because for some reason it does
         # not work as a param in requests.request.
@@ -362,7 +475,7 @@ class WeatherForecastDataManager(DataManager):
             query_params['latitude'] = str(coordinates[0])
             query_params['longitude'] = str(coordinates[1])
 
-            json_data = self.get_api_json_reponse(api_url, query_params)
+            json_data = self._get_api_json_reponse(api_url, query_params)
 
             forecast_hourly_data_df = pd.DataFrame(json_data['hourly'])
             forecast_hourly_data_df['location'] = location
@@ -388,7 +501,7 @@ class WeatherForecastDataManager(DataManager):
         return forecast_hourly_data
 
 
-    def merge_fetched_and_current_data(
+    def _merge_fetched_and_current_data(
         self,
         fetched_data : pd.DataFrame,
         current_data : pd.DataFrame
@@ -411,12 +524,12 @@ class WeatherForecastDataManager(DataManager):
         )
 
         # Fill any null values.
-        filled_data = self.fill_missing_values(merged_data)
+        filled_data = self._fill_missing_values(merged_data)
 
         self.save_existing_data_df(filled_data, temp = True)
 
 
-    def backup_fetched_data(self,
+    def _backup_fetched_data(self,
         fetched_data : pd.DataFrame,
         start : datetime.date
     ):
@@ -434,6 +547,11 @@ class WeatherForecastDataManager(DataManager):
 
 
     def update_current_data(self):
+        """Fetches new data, cleans, adds to existing data and saves.
+
+        Returns:
+            Boolean of whether update has been attempted.
+        """
 
         current_data = self.get_existing_data_df(temp = True)
 
@@ -446,7 +564,7 @@ class WeatherForecastDataManager(DataManager):
 
         # Max is a 7-day forecast including today, so end is 6 days
         # from today.
-        end = self.today() + pd.Timedelta(6, 'D')
+        end = self._today() + pd.Timedelta(6, 'D')
 
         # Don't run the update if we already have all the future data
         # we can get.
@@ -459,11 +577,11 @@ class WeatherForecastDataManager(DataManager):
         self.logger.info(
             f"Initiating update for {start} to {end}.")
 
-        fetched_data = self.fetch_data(start, end)
+        fetched_data = self._fetch_data(start, end)
 
-        self.backup_fetched_data(fetched_data, start)
+        self._backup_fetched_data(fetched_data, start)
 
-        self.merge_fetched_and_current_data(fetched_data, current_data)
+        self._merge_fetched_and_current_data(fetched_data, current_data)
 
         return True
 
@@ -524,7 +642,7 @@ class AirQualityDataManager(DataManager):
             'accept' : 'text/plain'
         }
 
-        response = self.get_api_response(self.REQUEST_API_URL, query_params, headers = headers)
+        response = self._get_api_response(self.REQUEST_API_URL, query_params, headers = headers)
 
         error_message_info = (
             f"Date: {date}, Pollutant: {pollutant}, Pollutant code: {query_params['polluant']}")
@@ -555,7 +673,7 @@ class AirQualityDataManager(DataManager):
             'accept' : 'application/octet-stream'
         }
 
-        response =  self.get_api_response(self.DOWNLOAD_API_URL, query_params, headers = headers)
+        response =  self._get_api_response(self.DOWNLOAD_API_URL, query_params, headers = headers)
 
         if response.status_code != 200:
 
@@ -964,7 +1082,7 @@ class AirQualityDataManager(DataManager):
             updated_data = self.add_processed_fetched_data_to_existing(cleaned_fetched_data)
 
             # Fill any gaps.
-            filled_data = self.fill_missing_values(updated_data)
+            filled_data = self._fill_missing_values(updated_data)
 
             # Store new data.
             self.save_existing_data_df(filled_data, temp = True)
@@ -978,7 +1096,7 @@ class AirQualityDataManager(DataManager):
         try:
 
             # First check that the next day's data is available.
-            today = self.today()
+            today = self._today()
             yesterday = today - pd.Timedelta(1, 'day')
 
             next_day_to_fetch = self.get_next_day_to_fetch(temp = True)
@@ -997,7 +1115,7 @@ class AirQualityDataManager(DataManager):
 
         except Exception as e:
 
-            self.handle_error(
+            self._handle_error(
                 e, message = f"Error occured when updating air quality data for {next_day_to_fetch}")
 
             return False
@@ -1162,7 +1280,7 @@ class HistoricalWeatherDataManager(DataManager):
 
             # Check we aren't missing the previous day.
             if prevent_date_gaps:
-                if not self.previous_days_data_exists(date, temp = True):
+                if not self._previous_days_data_exists(date, temp = True):
                     self.logger.warning(
                         f"Data not fetched for {date} because previous day's data not found.")
                     return False
@@ -1182,7 +1300,7 @@ class HistoricalWeatherDataManager(DataManager):
 
         except Exception as e:
 
-            self.handle_error(
+            self._handle_error(
                 e, message = f"Error occured when fetching and saving historical weather data for {date}")
 
             return False
@@ -1251,7 +1369,7 @@ class HistoricalWeatherDataManager(DataManager):
             if merged_data is None:
                 return False
 
-            filled_data = self.fill_missing_values(merged_data)
+            filled_data = self._fill_missing_values(merged_data)
 
             fixed_values = self.fix_error_values(filled_data)
 
@@ -1263,7 +1381,7 @@ class HistoricalWeatherDataManager(DataManager):
 
         except Exception as e:
 
-            self.handle_error(
+            self._handle_error(
                 e, message = f"Error occured when adding and saving historical weather data for {date}")
 
             return False
@@ -1272,7 +1390,7 @@ class HistoricalWeatherDataManager(DataManager):
     def update_next_day(self):
 
         # First check that the next day's data is available.
-        today = self.today()
+        today = self._today()
         yesterday = today - pd.Timedelta(1, 'day')
 
         next_day_to_fetch = self.get_next_day_to_fetch(temp = True)
