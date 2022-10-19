@@ -435,6 +435,11 @@ html {
         width: 100%;
     }
 
+    .grid-row .right-image,
+    .grid-row .left-image {
+        margin-right: -20px;
+    }
+
 }
 
 @media (max-width: 450px) {
