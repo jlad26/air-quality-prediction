@@ -407,6 +407,8 @@ class WeatherForecastDataManager(DataManager):
         API_URL: String of API url for fetching data.
         LOCATIONS: List of locations for which data must be fetched.
         DATA_COLUMNS: List of the types of data that must be fetched.
+        logger: A logger instance from the Python logging module. Set by subclass.
+        existing_data: A Pandas dataframe containing the existing data.
     """
 
     EXISTING_DATA_FILENAME = 'Processed weather forecast data'
@@ -587,6 +589,28 @@ class WeatherForecastDataManager(DataManager):
 
 
 class AirQualityDataManager(DataManager):
+    """For downloading, cleaning and updating pollutant data.
+
+    The process for downloading data via API from Geod'Air is in two stages. First,
+    specify the data to be downloaded in one request. The response will be an id that
+    is used in the second request to download the file generated.
+
+    Attributes:
+        EXISTING_DATA_FILENAME: String of filename of the current weather forecast data.
+        BACKUPS_PATH: String of path to the folder where downloaded data is stored
+        LOGS_PATH: String of path to the log file.
+        REQUEST_API_URL: String of API url for requesting creation of a download file.
+        DOWNLOAD_API_URL: String of API url for downloading data when created.
+        POLLUTANT_CODES: Dictionary of mapping of pollutant to codes used by Geod'Air to
+            represent those codes.
+        POLLUTANTS: List of the pollutants as strings.
+        STATION_LOCATIONS: Dictionary with strings of pollutants as keys, and their values
+            being a list of the locations where data for the given pollutant is recorded. Used
+            in the request API.
+        api_key: String of key to use in API request.
+        logger: A logger instance from the Python logging module. Set by subclass.
+        existing_data: A Pandas dataframe containing the existing data.
+    """
 
     EXISTING_DATA_FILENAME = 'Processed pollutants data'
 
@@ -630,7 +654,7 @@ class AirQualityDataManager(DataManager):
             name = 'Pollutants data update', log_filepath = self.LOGS_PATH)
 
 
-    def fetch_download_id(self, date : str, pollutant : str):
+    def _fetch_download_id(self, date : str, pollutant : str):
 
         query_params = {
             'date' : date,
@@ -664,7 +688,7 @@ class AirQualityDataManager(DataManager):
         return response.text
 
 
-    def download_file_stream(self, download_id : str):
+    def _download_file_stream(self, download_id : str):
 
         query_params = {'id' : download_id}
 
@@ -677,88 +701,86 @@ class AirQualityDataManager(DataManager):
 
         if response.status_code != 200:
 
-            """
-            TODO use errors and aqlogging
-            raise ValueError(
-                f"Unsuccessful Geod'Air download request. Status code: {response.status_code}." +
-                f"Download id: {download_id}")
-            """
+            message = (
+                f"Unsuccessful Geod'Air download request. Status code: {response.status_code}."
+                f"Download id: {download_id}"
+            )
+            self.logger.error(message)
 
             return None
 
         if response.text[:4] != 'Date':
 
-            """
-            TODO use errors and aqlogging
-            raise ValueError(
-                f"Unexpected content from Geod'Air download request: {response.text}\n" +
+            message = (
+                f"Unexpected content from Geod'Air download request: {response.text}\n"
                 f"Download id: {download_id}"
             )
-            """
+            self.logger.error(message)
 
             return None
 
         return response.text
 
-    def download_file_exists(self, date : str, pollutant : str):
-        return os.path.exists(self.get_backup_path(date, pollutant))
+
+    def _download_file_exists(self, date : str, pollutant : str):
+        return os.path.exists(self._get_backup_path(date, pollutant))
 
 
-    def get_backup_path(self, date : str, pollutant : str):
+    def _get_backup_path(self, date : str, pollutant : str):
         return os.path.join(self.BACKUPS_PATH, f"{pollutant}_{date}.gz")
 
 
-    def save_backup(self, content : str, date : str, pollutant : str):
+    def _save_backup(self, content : str, date : str, pollutant : str):
         data_df = pd.read_csv(StringIO(content), sep = ';')
-        path = self.get_backup_path(date, pollutant)
+        path = self._get_backup_path(date, pollutant)
         data_df.to_csv(path)
 
 
-    def get_pollutants_to_request(self, date : str):
+    def _get_pollutants_to_request(self, date : str):
 
         output = []
 
         # Check which pollutants we need to get.
         for pollutant in self.POLLUTANTS:
-            if not self.download_file_exists(date, pollutant):
+            if not self._download_file_exists(date, pollutant):
                 output.append(pollutant)
 
         return output
 
 
-    def fetch_pollutant_download_ids(self, date : str, pollutants : list[str]):
+    def _fetch_pollutant_download_ids(self, date : str, pollutants : list[str]):
 
         download_ids = {}
 
         for pollutant in pollutants:
-            response = self.fetch_download_id(date, pollutant)
+            response = self._fetch_download_id(date, pollutant)
 
             if response:
-                download_ids[pollutant] = self.fetch_download_id(date, pollutant)
+                download_ids[pollutant] = self._fetch_download_id(date, pollutant)
             time.sleep(0.5)
 
         return download_ids
 
-    def fetch_required_pollutant_ids(self, date : str):
+    def _fetch_required_pollutant_ids(self, date : str):
 
-        pollutants_to_request = self.get_pollutants_to_request(date)
-        return self.fetch_pollutant_download_ids(date, pollutants_to_request)
+        pollutants_to_request = self._get_pollutants_to_request(date)
+        return self._fetch_pollutant_download_ids(date, pollutants_to_request)
 
 
-    def download_file_streams(self, date : str, download_ids : dict):
+    def _download_file_streams(self, date : str, download_ids : dict):
         for pollutant, download_id in download_ids.items():
 
-            content = self.download_file_stream(download_id)
+            content = self._download_file_stream(download_id)
 
             if content:
-                self.save_backup(content, date, pollutant)
+                self._save_backup(content, date, pollutant)
 
             time.sleep(1)
 
 
-    def single_fetch_data(self, date : str):
+    def _single_fetch_data(self, date : str):
 
-        download_ids = self.fetch_required_pollutant_ids(date)
+        download_ids = self._fetch_required_pollutant_ids(date)
         pollutants_str = ', '.join(download_ids.keys()) if download_ids else 'None'
         self.logger.info(f"Fetching data of {date} for pollutants: {pollutants_str}")
 
@@ -766,9 +788,9 @@ class AirQualityDataManager(DataManager):
         if download_ids:
             time.sleep(5)
 
-        self.download_file_streams(date, download_ids)
+        self._download_file_streams(date, download_ids)
 
-        remaining_pollutant_ids = self.fetch_required_pollutant_ids(date)
+        remaining_pollutant_ids = self._fetch_required_pollutant_ids(date)
 
         pollutants_str = ', '.join(remaining_pollutant_ids.keys()) if remaining_pollutant_ids else 'None'
         self.logger.info(f"Data fetched for {date}. Outstanding pollutants: {pollutants_str}")
@@ -776,25 +798,25 @@ class AirQualityDataManager(DataManager):
         return remaining_pollutant_ids
 
 
-    def get_merged_pollutants_data(self, date : str):
+    def _get_merged_pollutants_data(self, date : str):
 
         pollutant_data_dfs = []
         for pollutant in self.POLLUTANTS:
-            pollutant_data_path = self.get_backup_path(date, pollutant)
+            pollutant_data_path = self._get_backup_path(date, pollutant)
             pollutant_data_df = pd.read_csv(pollutant_data_path)
 
             # Select only the columns we need.
-            pollutant_data_df = self.clean_columns_pollutants_data(pollutant_data_df)
+            pollutant_data_df = self._clean_columns_pollutants_data(pollutant_data_df)
 
             # Select the appropriate locations.
-            pollutant_data_df = self.filter_pollutants_data_by_location(
+            pollutant_data_df = self._filter_pollutants_data_by_location(
                 pollutant_data_df, pollutant
             ).copy()
 
             # If we have no data at all for this date and pollutant then we copy
             # from the day before.
             if len(pollutant_data_df) == 0:
-                pollutant_data_df = self.get_filled_missing_day_data(date, pollutant)
+                pollutant_data_df = self._get_filled_missing_day_data(date, pollutant)
 
             # Rename the valeur brute column.
             pollutant_data_df.rename(columns = {'valeur brute' : 'Concentration'}, inplace = True)
@@ -806,7 +828,7 @@ class AirQualityDataManager(DataManager):
         return merged_data
 
 
-    def get_previous_day_data(self, date : str, pollutant : str):
+    def _get_previous_day_data(self, date : str, pollutant : str):
 
         previous_day = pd.to_datetime(date).date() - pd.Timedelta(1, 'day')
 
@@ -820,9 +842,9 @@ class AirQualityDataManager(DataManager):
         return previous_day_data
 
 
-    def get_filled_missing_day_data(self, date : str, pollutant : str):
+    def _get_filled_missing_day_data(self, date : str, pollutant : str):
 
-        filled_day_data = self.get_previous_day_data(date, pollutant).copy()
+        filled_day_data = self._get_previous_day_data(date, pollutant).copy()
 
         # Shift the datetime forward by one day.
         filled_day_data['Datetime'] = filled_day_data['Datetime'] + pd.Timedelta(1, 'Day')
@@ -836,46 +858,48 @@ class AirQualityDataManager(DataManager):
 
 
 
-    def get_cleaned_fetched_pollutants_data(self, date : str):
+    def _get_cleaned_fetched_pollutants_data(self, date : str):
 
-        fetched_data = self.get_merged_pollutants_data(date)
+        fetched_data = self._get_merged_pollutants_data(date)
 
-        cleaned_df = self.get_non_positive_values_replaced_with_nan(fetched_data)
+        cleaned_df = self._get_non_positive_values_replaced_with_nan(fetched_data)
 
-        averaged_data = self.get_data_averaged_across_sites(cleaned_df)
+        averaged_data = self._get_data_averaged_across_sites(cleaned_df)
 
         return averaged_data
 
 
-    def get_filled_data(self, data : pd.DataFrame):
+    def _get_filled_data(self, data : pd.DataFrame):
 
-        data_filled_with_whole_days = self.get_data_filled_with_whole_days(data)
+        data_filled_with_whole_days = self._get_data_filled_with_whole_days(data)
 
-        return data_filled_with_whole_days
+        filled_data = self._fill_missing_values(data_filled_with_whole_days)
+
+        return filled_data
 
 
-    def get_data_filled_with_whole_days(self, data):
+    def _get_data_filled_with_whole_days(self, data):
 
-        pollutant_days_to_copy = self.get_days_needing_replacement(data)
+        pollutant_days_to_copy = self._get_days_needing_replacement(data)
 
         # If we have no days to copy, no changes needed!
         if pollutant_days_to_copy is None:
             return data
 
-        fetched_data_excl_days_needing_replacement = self.get_data_without_days_to_replace(
+        fetched_data_excl_days_needing_replacement = self._get_data_without_days_to_replace(
             data, pollutant_days_to_copy
         )
 
         existing_data = self.get_existing_data_df()
 
-        return self.replace_copied_days_data(
+        return self._replace_copied_days_data(
             existing_data,
             fetched_data_excl_days_needing_replacement,
             pollutant_days_to_copy
         )
 
 
-    def get_data_averaged_across_sites(self, pollutants_data : pd.DataFrame):
+    def _get_data_averaged_across_sites(self, pollutants_data : pd.DataFrame):
 
         averaged_data = pollutants_data.pivot_table(
             index = ['Polluant', 'Datetime'],
@@ -888,7 +912,7 @@ class AirQualityDataManager(DataManager):
         return averaged_data.reset_index()
 
 
-    def clean_columns_pollutants_data(self, pollutant_data_df : pd.DataFrame):
+    def _clean_columns_pollutants_data(self, pollutant_data_df : pd.DataFrame):
 
         # Select only the columns we need.
         pollutant_data_df = pollutant_data_df[[
@@ -907,7 +931,7 @@ class AirQualityDataManager(DataManager):
         return pollutant_data_df
 
 
-    def filter_pollutants_data_by_location(self, df : pd.DataFrame, pollutant : str):
+    def _filter_pollutants_data_by_location(self, df : pd.DataFrame, pollutant : str):
 
         # Correct known location misspellings.
         df.loc[df['nom site'] == 'Chaptal', 'nom site'] = 'Montpellier Chaptal'
@@ -919,33 +943,13 @@ class AirQualityDataManager(DataManager):
         return df
 
 
-    def get_merged_fetched_and_existing_data(self, fetched_data_df : pd.DataFrame):
-        existing_data_df = self.get_existing_data_df()
-        merged_df = pd.concat([existing_data_df, fetched_data_df]).reset_index(drop = True)
-        return merged_df.sort_values(
-            by = ['Polluant', 'Datetime'],
-        )
-
-
-    def get_non_positive_values_replaced_with_nan(self, df: pd.DataFrame):
+    def _get_non_positive_values_replaced_with_nan(self, df: pd.DataFrame):
         output = df.copy()
         output.loc[output['Concentration'] <= 0, 'Concentration'] = np.nan
         return output
 
 
-    def get_df_averaged_values_across_sites(self, data_df : pd.DataFrame):
-        averaged_data = data_df.pivot_table(
-            index = ['Polluant', 'Datetime'],
-            values = 'Concentration',
-            aggfunc = 'mean',
-            fill_value = np.nan,
-            dropna = False
-        )
-
-        return averaged_data
-
-
-    def get_days_needing_replacement(self, fetched_data : pd.DataFrame):
+    def _get_days_needing_replacement(self, fetched_data : pd.DataFrame):
 
         # Get a count of the null values by day.
         null_values = fetched_data[fetched_data['Concentration'].isna()].copy()
@@ -978,7 +982,7 @@ class AirQualityDataManager(DataManager):
         return pollutant_days_to_copy
 
 
-    def get_data_without_days_to_replace(
+    def _get_data_without_days_to_replace(
         self, fetched_data : pd.DataFrame, pollutant_days_to_copy : pd.DataFrame):
 
         fetched = fetched_data.copy()
@@ -999,7 +1003,7 @@ class AirQualityDataManager(DataManager):
         return fetched_data_merged_without_days_to_copy
 
 
-    def same_day_last_year(self, polluant_date):
+    def _same_day_last_year(self, polluant_date):
 
         polluant, date = polluant_date.split(' ')
         year = int(date[:4])
@@ -1012,7 +1016,7 @@ class AirQualityDataManager(DataManager):
         return f"{polluant} {year - 1}{month_day}"
 
 
-    def replace_copied_days_data(
+    def _replace_copied_days_data(
         self,
         existing_data : pd.DataFrame,
         fetched_data_merged_without_days_to_copy : pd.DataFrame,
@@ -1026,10 +1030,12 @@ class AirQualityDataManager(DataManager):
             existing_copy['Polluant'] + ' ' + existing_data['Datetime'].dt.strftime('%Y-%m-%d'))
 
         for polluant_date in pollutant_days_to_copy['Polluant-Date']:
-            data_to_copy = existing_copy[
+            slice_to_copy = existing_copy[
                 existing_copy['Polluant-Date'] == \
-                    self.same_day_last_year(polluant_date)
+                    self._same_day_last_year(polluant_date)
             ]
+
+            data_to_copy = slice_to_copy.copy()
 
             data_to_copy['Datetime'] = pd.to_datetime(
                 polluant_date[-10:] + ' ' + data_to_copy['Datetime'].dt.strftime('%H:%M:%S')
@@ -1043,7 +1049,7 @@ class AirQualityDataManager(DataManager):
         ).drop(columns = 'Polluant-Date')
 
 
-    def add_processed_fetched_data_to_existing(self, processed_fetched_data):
+    def _add_processed_fetched_data_to_existing(self, processed_fetched_data):
 
         existing_data = self.get_existing_data_df(temp = True)
 
@@ -1064,25 +1070,24 @@ class AirQualityDataManager(DataManager):
         ).reset_index(drop = True)
 
 
-    def run_update(self, date : str):
+    def _run_update(self, date : str):
 
         # Log beginning of process.
         self.logger.info(f"Initiating air quality data update for {date}")
 
         # Fetch data.
-        outstanding_download_ids = self.single_fetch_data(date)
+        outstanding_download_ids = self._single_fetch_data(date)
 
         # Only update existing stored data if we have data for all pollutants.
         if len(outstanding_download_ids.keys()) == 0:
 
             # Get the stored update data and process it.
-            cleaned_fetched_data = self.get_cleaned_fetched_pollutants_data(date)
+            cleaned_fetched_data = self._get_cleaned_fetched_pollutants_data(date)
 
             # Merge with existing data.
-            updated_data = self.add_processed_fetched_data_to_existing(cleaned_fetched_data)
+            updated_data = self._add_processed_fetched_data_to_existing(cleaned_fetched_data)
 
-            # Fill any gaps.
-            filled_data = self._fill_missing_values(updated_data)
+            filled_data = self._get_filled_data(updated_data)
 
             # Store new data.
             self.save_existing_data_df(filled_data, temp = True)
@@ -1091,7 +1096,7 @@ class AirQualityDataManager(DataManager):
             self.logger.info(f"Air quality data updated for {date}")
 
 
-    def update_next_day(self):
+    def _update_next_day(self):
 
         try:
 
@@ -1108,7 +1113,7 @@ class AirQualityDataManager(DataManager):
 
             update_date_str = next_day_to_fetch.strftime('%Y-%m-%d')
 
-            self.run_update(update_date_str)
+            self._run_update(update_date_str)
 
             return True
 
@@ -1122,7 +1127,9 @@ class AirQualityDataManager(DataManager):
 
 
     def update_to_yesterday(self):
-        """We limit the number of attempts to ensure we can't be stuck in an
+        """Update pollutant data to yesterday if possible.
+
+        We limit the number of attempts to ensure we can't be stuck in an
         infinite loop. This means we limit the max number of days that can be
         fetched as well.
         """
@@ -1135,7 +1142,7 @@ class AirQualityDataManager(DataManager):
 
         while attempt <= max_attempts and no_fails:
 
-            no_fails = self.update_next_day()
+            no_fails = self._update_next_day()
 
             # Don't bombard the API.
             if no_fails:
