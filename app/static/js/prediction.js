@@ -166,8 +166,6 @@
 
     const datepickers = document.querySelectorAll('.flatpickr');
 
-    flatpickr('.flatpickr');
-
     datepickers.forEach(function(datePicker) {
 
         const config = {
@@ -223,12 +221,15 @@
             'last-known' : ['actual_end_time', 1]
         }
 
-        startInput.value = keyDates[scenarioData[scenario][0]]
-        // If we have a mobile input then we need to change the value of that too.
-        const startInputSibling = startInput.nextElementSibling
-        if (startInputSibling && startInputSibling.classList.contains('flatpickr-mobile')) {
-            startInputSibling.value = keyDates[scenarioData[scenario][0]];
-        }
+        const fp = document.querySelector("#start-pollutant-date")._flatpickr;
+        fp.setDate(keyDates[scenarioData[scenario][0]]);
+
+        // startInput.value = keyDates[scenarioData[scenario][0]]
+        // // If we have a mobile input then we need to change the value of that too.
+        // const startInputSibling = startInput.nextElementSibling
+        // if (startInputSibling && startInputSibling.classList.contains('flatpickr-mobile')) {
+        //     startInputSibling.value = keyDates[scenarioData[scenario][0]];
+        // }
         daysChoice.value = scenarioData[scenario][1]
 
     }
