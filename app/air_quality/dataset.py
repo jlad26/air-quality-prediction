@@ -37,6 +37,59 @@ class TrainingType(Enum):
 
 
 class Dataset:
+    """Converts saved data into a form suitable for training by a model.
+
+    Slices and prepares the data according to the dictionary of dataset choices. In this class
+    we use the following terminology:
+        dataset type: to refer to the use of a particular timeseries - either 'train', 'val' or
+            'train_val'. Corresponds to the keys of the dictionaries of the TrainingType Enum.
+        timeseries type: to refer to a slice of data, e.g., 'train', 'val', 'train_val',
+            'test', 'train_val_test', etc. Corresponds to the the values of the dictionaries of
+            the TrainingType Enum.
+
+    Attributes:
+        training_type: TrainingType for this dataset.
+        target_ts_set: air_quality.TimeSeriesSet instance of the target series.
+        covariates_ts_set: Dictionary with two keys 'past' and 'future' with the value in each
+            case being the corresponding air_quality.TimeSeriesSet of the covariates series.
+        dataset_choices: Dictionary of settings that define the dataset:
+            training_type: can be one of 'VAL' or 'TEST. This specifies whether we are in
+                'validation' or 'test' mode. In 'validation' mode - (used for selecting and tuning
+                a model) we train on the 'train' data and validate on the 'validation' data, while
+                the 'test' data remains unseen. In 'test' mode we train on 'train' and 'validation'
+                data combined, and we validate (for early stopping) on the 'test' data.
+            forecast_pollutants: a list of which pollutant(s) to train on.
+            covariates_types: which combination of 'past' and 'future' covariates (i.e., weather
+                data and/or seasonal time data) to train with. Different models can use different
+                types of covariates so this choice is automatically overridden where necessary later
+                on. (Forexample, Transformers cannot use future covariates, so a selection of
+                'future' would be ignored. This is useful for evaluating which types of covariates
+                improve prediction.
+            feature_covariates: which combination of covariates types to train on. 'data' means the
+                weather data (forecast and historical) while time means seasonal time information
+                of hour, day of week, and month. This is useful for evaluating which types of
+                covariates improve prediction.
+            forecast_pollutants: List of strings of pollutants to be forecasted.
+            forecast_locations: List of strings of locations ordered to correspond with the list
+                of pollutants in forecast_pollutants.
+            ts_target_unscaled: A dictionary with keys of dataset type and values containing lists
+                of Darts Timeseries, one for each pollutant being forecasted. The Darts timeseries
+                represent the unscaled target series, one for each pollutant being forecasted.
+            target_scalers: A list of Scaler instances corresponding to the list of pollutants
+                being forecasted. Each Scaler was used to scale the timeseries of the corresponding
+                pollutant.
+            ts_target_scaled: Equivalent to ts_target_unscaled except that the timeseries have been
+                scaled.
+            covariates_scalers: A dictionary with two keys 'past' and 'future'. Each value is a
+                list of Scaler instances that were used to scale the corresponding timeseries
+                for each pollutant being forecasted.
+            ts_covariates_unscaled: A dictionary with two keys 'past' and 'future'. Each value is a
+                list of Darts Timeseries, one for each pollutant being forecasted. The Darts
+                timeseries represent the unscaled covariates data.
+            ts_covariates_scaled: Equivalent to ts_covariates_unscaled except that the timeseries
+                have been scaled.
+            start_time: Pandas timestamp of the start time of all the series.
+    """
 
     def __init__(
         self,
@@ -62,22 +115,22 @@ class Dataset:
                 else 'Montpellier' for pollutant in self.forecast_pollutants
         ]
 
-        self.ts_target_unscaled = self.get_unscaled_target_series()
-        self.target_scalers = self.get_target_scalers()
-        self.ts_target_scaled = self.get_scaled_target_series()
+        self.ts_target_unscaled = self._get_unscaled_target_series()
+        self.target_scalers = self._get_target_scalers()
+        self.ts_target_scaled = self._get_scaled_target_series()
 
         self.covariates_scalers = {
             'past' : [],
             'future' : []
         }
-        self.ts_covariates_unscaled = self.get_unscaled_covariates_series()
-        self.ts_covariates_scaled = self.get_scaled_covariates_series()
+        self.ts_covariates_unscaled = self._get_unscaled_covariates_series()
+        self.ts_covariates_scaled = self._get_scaled_covariates_series()
 
         # Set start times.
-        self.start_time = self.get_start_time()
+        self.start_time = self._get_start_time()
 
 
-    def get_start_time(self):
+    def _get_start_time(self):
 
         start_time = self.ts_target_unscaled['train'][0].start_time()
 
@@ -99,7 +152,7 @@ class Dataset:
         return start_time
 
 
-    def get_unscaled_target_series(self):
+    def _get_unscaled_target_series(self):
         series = {}
         for ds_type, ds_slice in self.training_type.value.items():
 
@@ -113,7 +166,7 @@ class Dataset:
         return series
 
 
-    def get_target_scalers(self):
+    def _get_target_scalers(self):
 
         scalers = []
 
@@ -126,7 +179,7 @@ class Dataset:
         return scalers
 
 
-    def get_scaled_target_series(self):
+    def _get_scaled_target_series(self):
 
         ts_target_scaled = {}
         for ds_component, ts_sequence_unscaled in self.ts_target_unscaled.items():
@@ -156,12 +209,12 @@ class Dataset:
         return ts_target_scaled
 
 
-    def get_unscaled_time_features_series(self):
+    def _get_unscaled_time_features_series(self):
         ts_type = self.training_type.value['train_val']
-        return self.get_unscaled_time_features_series_by_ts_type(ts_type)
+        return self._get_unscaled_time_features_series_by_ts_type(ts_type)
 
 
-    def get_unscaled_time_features_series_by_ts_type(self, ts_type):
+    def _get_unscaled_time_features_series_by_ts_type(self, ts_type):
 
         target_ts_sequence = self.target_ts_set.get_ts_sequence(ts_type)
 
@@ -176,19 +229,19 @@ class Dataset:
         return ts_time_features
 
 
-    def get_unscaled_data_covariates_series(self):
+    def _get_unscaled_data_covariates_series(self):
 
         ts_type = self.training_type.value['train_val']
-        return self.get_unscaled_data_covariates_series_by_ts_type(ts_type)
+        return self._get_unscaled_data_covariates_series_by_ts_type(ts_type)
 
 
-    def get_unscaled_data_covariates_series_by_ts_type(self, ts_type):
+    def _get_unscaled_data_covariates_series_by_ts_type(self, ts_type):
 
         covariates_ts_unscaled = {}
 
         # Fix the end time to be no longer than the end of the equivalent target series.
         # Otherwise our time features series won't match the length of the covariates.
-        # TODO Don't rely on NO2 key. Tidy up this class generally!
+        # TODO Don't rely on NO2 key.
         end_time = self.target_ts_set.ts[ts_type]['NO2'].end_time()
 
         for cov_type in self.dataset_choices['covariates_types']:
@@ -202,7 +255,7 @@ class Dataset:
         return covariates_ts_unscaled
 
 
-    def get_selected_covariates_series(self, data_covariates_series, time_features_series):
+    def _get_selected_covariates_series(self, data_covariates_series, time_features_series):
 
         feature_covariates = self.dataset_choices['feature_covariates']
         covariates_types = self.dataset_choices['covariates_types']
@@ -231,23 +284,23 @@ class Dataset:
         return ts_covariates
 
 
-    def get_unscaled_covariates_series(self):
-        return self.get_selected_covariates_series(
-            self.get_unscaled_data_covariates_series(),
-            self.get_unscaled_time_features_series()
+    def _get_unscaled_covariates_series(self):
+        return self._get_selected_covariates_series(
+            self._get_unscaled_data_covariates_series(),
+            self._get_unscaled_time_features_series()
         )
 
 
-    def get_scaled_covariates_series(self):
+    def _get_scaled_covariates_series(self):
 
         # We must fit the scalers using only the training set.
         # Get the unscaled covariates for the training set.
         unscaled_data_covariates_series_train = \
-            self.get_unscaled_data_covariates_series_by_ts_type('train')
+            self._get_unscaled_data_covariates_series_by_ts_type('train')
         unscaled_time_features_series_train = \
-            self.get_unscaled_time_features_series_by_ts_type('train')
+            self._get_unscaled_time_features_series_by_ts_type('train')
 
-        unscaled_ts_covariates_train = self.get_selected_covariates_series(
+        unscaled_ts_covariates_train = self._get_selected_covariates_series(
             unscaled_data_covariates_series_train,
             unscaled_time_features_series_train
         )
@@ -293,11 +346,14 @@ class Dataset:
 
 
     def get_ts_first_last(self, ts, caption = ''):
-        """Displays the first and last row of a timeseries dataframe.
+        """Gets the first and last row of a timeseries dataframe.
 
         Args:
             ts: TimeSeries instance.
             caption: A string to be used as the caption for the dataframe.
+
+        Returns:
+            Pandas dataframe.
         """
 
         if caption:
@@ -307,6 +363,15 @@ class Dataset:
 
 
     def get_first_last_covariates(self, scaled = False):
+        """Gets the first and last row of the timeseries dataframe for
+        each combination of covariate type and pollutant.
+
+        Args:
+            scaled: Boolean indicating whether to apply to the scaled timeseries.
+
+        Returns:
+            List of Pandas dataframes.
+        """
 
         if scaled:
             ts_covariates = self.ts_covariates_scaled
@@ -334,6 +399,15 @@ class Dataset:
 
 
     def get_first_last_target_series(self, scaled = False):
+        """Gets the first and last row of the timeseries dataframe for
+        each the target series of each pollutant.
+
+        Args:
+            scaled: Boolean indicating whether to apply to the scaled timeseries.
+
+        Returns:
+            List of Pandas dataframes.
+        """
 
         if scaled:
             ts_target = self.ts_target_scaled
@@ -359,6 +433,17 @@ class Dataset:
 
 
     def concatenate_ts_sequences(self, ts_seq, other_ts_seq, axis = 0):
+        """Takes two lists of Darts timeseries and performs pair-wise concatenation.
+
+        Args:
+            ts_seq: First list of Darts timeseries.
+            other_ts_seq: Second list of Darts timeries.
+            axis: Integer representing axis along which to concatenate, 0 being time and 1 being
+                component.
+
+        Returns:
+            List of concatenated Darts Timeseries.
+        """
 
         # Check that sequences are the same length:
         if len(ts_seq) != len(other_ts_seq):
@@ -371,8 +456,14 @@ class Dataset:
 
     @staticmethod
     def maybe_convert_ts_sequence_to_list(ts_sequence):
-        """Handle the case when we have only a single timeseries,
-        not a list of timeseries.
+        """Handles the case when we have only a single timeseries,
+        not a list of timeseries, by converting it to a list.
+
+        Args:
+            Darts timeseries or a list of Darts Timeseries
+
+        Returns:
+            List of Darts timeseries.
         """
 
         if not isinstance(ts_sequence, list):
@@ -381,6 +472,13 @@ class Dataset:
 
 
     def get_model_input(self):
+        """Restructures timeries and dataset data in to a form suitable for initializing a new
+        instance of a model.
+
+        Returns:
+            Dictionary of dataset and timeseries data with keys corresponding to the parameters
+            os a model instance.
+        """
 
         # Extract the forecast pollutants from dataset_choices as they are
         # specified separately.
