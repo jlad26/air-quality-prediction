@@ -806,10 +806,10 @@ class AirQualityDataManager(DataManager):
             pollutant_data_df = pd.read_csv(pollutant_data_path)
 
             # Select only the columns we need.
-            pollutant_data_df = self.clean_columns_pollutants_data(pollutant_data_df)
+            pollutant_data_df = self._clean_columns_pollutants_data(pollutant_data_df)
 
             # Select the appropriate locations.
-            pollutant_data_df = self.filter_pollutants_data_by_location(
+            pollutant_data_df = self._filter_pollutants_data_by_location(
                 pollutant_data_df, pollutant
             ).copy()
 
@@ -862,9 +862,9 @@ class AirQualityDataManager(DataManager):
 
         fetched_data = self._get_merged_pollutants_data(date)
 
-        cleaned_df = self.get_non_positive_values_replaced_with_nan(fetched_data)
+        cleaned_df = self._get_non_positive_values_replaced_with_nan(fetched_data)
 
-        averaged_data = self.get_data_averaged_across_sites(cleaned_df)
+        averaged_data = self._get_data_averaged_across_sites(cleaned_df)
 
         return averaged_data
 
@@ -880,26 +880,26 @@ class AirQualityDataManager(DataManager):
 
     def _get_data_filled_with_whole_days(self, data):
 
-        pollutant_days_to_copy = self.get_days_needing_replacement(data)
+        pollutant_days_to_copy = self._get_days_needing_replacement(data)
 
         # If we have no days to copy, no changes needed!
         if pollutant_days_to_copy is None:
             return data
 
-        fetched_data_excl_days_needing_replacement = self.get_data_without_days_to_replace(
+        fetched_data_excl_days_needing_replacement = self._get_data_without_days_to_replace(
             data, pollutant_days_to_copy
         )
 
         existing_data = self.get_existing_data_df()
 
-        return self.replace_copied_days_data(
+        return self._replace_copied_days_data(
             existing_data,
             fetched_data_excl_days_needing_replacement,
             pollutant_days_to_copy
         )
 
 
-    def get_data_averaged_across_sites(self, pollutants_data : pd.DataFrame):
+    def _get_data_averaged_across_sites(self, pollutants_data : pd.DataFrame):
 
         averaged_data = pollutants_data.pivot_table(
             index = ['Polluant', 'Datetime'],
@@ -912,7 +912,7 @@ class AirQualityDataManager(DataManager):
         return averaged_data.reset_index()
 
 
-    def clean_columns_pollutants_data(self, pollutant_data_df : pd.DataFrame):
+    def _clean_columns_pollutants_data(self, pollutant_data_df : pd.DataFrame):
 
         # Select only the columns we need.
         pollutant_data_df = pollutant_data_df[[
@@ -931,7 +931,7 @@ class AirQualityDataManager(DataManager):
         return pollutant_data_df
 
 
-    def filter_pollutants_data_by_location(self, df : pd.DataFrame, pollutant : str):
+    def _filter_pollutants_data_by_location(self, df : pd.DataFrame, pollutant : str):
 
         # Correct known location misspellings.
         df.loc[df['nom site'] == 'Chaptal', 'nom site'] = 'Montpellier Chaptal'
@@ -943,33 +943,13 @@ class AirQualityDataManager(DataManager):
         return df
 
 
-    def get_merged_fetched_and_existing_data(self, fetched_data_df : pd.DataFrame):
-        existing_data_df = self.get_existing_data_df()
-        merged_df = pd.concat([existing_data_df, fetched_data_df]).reset_index(drop = True)
-        return merged_df.sort_values(
-            by = ['Polluant', 'Datetime'],
-        )
-
-
-    def get_non_positive_values_replaced_with_nan(self, df: pd.DataFrame):
+    def _get_non_positive_values_replaced_with_nan(self, df: pd.DataFrame):
         output = df.copy()
         output.loc[output['Concentration'] <= 0, 'Concentration'] = np.nan
         return output
 
 
-    def get_df_averaged_values_across_sites(self, data_df : pd.DataFrame):
-        averaged_data = data_df.pivot_table(
-            index = ['Polluant', 'Datetime'],
-            values = 'Concentration',
-            aggfunc = 'mean',
-            fill_value = np.nan,
-            dropna = False
-        )
-
-        return averaged_data
-
-
-    def get_days_needing_replacement(self, fetched_data : pd.DataFrame):
+    def _get_days_needing_replacement(self, fetched_data : pd.DataFrame):
 
         # Get a count of the null values by day.
         null_values = fetched_data[fetched_data['Concentration'].isna()].copy()
@@ -1002,7 +982,7 @@ class AirQualityDataManager(DataManager):
         return pollutant_days_to_copy
 
 
-    def get_data_without_days_to_replace(
+    def _get_data_without_days_to_replace(
         self, fetched_data : pd.DataFrame, pollutant_days_to_copy : pd.DataFrame):
 
         fetched = fetched_data.copy()
@@ -1023,7 +1003,7 @@ class AirQualityDataManager(DataManager):
         return fetched_data_merged_without_days_to_copy
 
 
-    def same_day_last_year(self, polluant_date):
+    def _same_day_last_year(self, polluant_date):
 
         polluant, date = polluant_date.split(' ')
         year = int(date[:4])
@@ -1036,7 +1016,7 @@ class AirQualityDataManager(DataManager):
         return f"{polluant} {year - 1}{month_day}"
 
 
-    def replace_copied_days_data(
+    def _replace_copied_days_data(
         self,
         existing_data : pd.DataFrame,
         fetched_data_merged_without_days_to_copy : pd.DataFrame,
@@ -1052,7 +1032,7 @@ class AirQualityDataManager(DataManager):
         for polluant_date in pollutant_days_to_copy['Polluant-Date']:
             slice_to_copy = existing_copy[
                 existing_copy['Polluant-Date'] == \
-                    self.same_day_last_year(polluant_date)
+                    self._same_day_last_year(polluant_date)
             ]
 
             data_to_copy = slice_to_copy.copy()
@@ -1069,7 +1049,7 @@ class AirQualityDataManager(DataManager):
         ).drop(columns = 'Polluant-Date')
 
 
-    def add_processed_fetched_data_to_existing(self, processed_fetched_data):
+    def _add_processed_fetched_data_to_existing(self, processed_fetched_data):
 
         existing_data = self.get_existing_data_df(temp = True)
 
@@ -1090,7 +1070,7 @@ class AirQualityDataManager(DataManager):
         ).reset_index(drop = True)
 
 
-    def run_update(self, date : str):
+    def _run_update(self, date : str):
 
         # Log beginning of process.
         self.logger.info(f"Initiating air quality data update for {date}")
@@ -1105,7 +1085,7 @@ class AirQualityDataManager(DataManager):
             cleaned_fetched_data = self._get_cleaned_fetched_pollutants_data(date)
 
             # Merge with existing data.
-            updated_data = self.add_processed_fetched_data_to_existing(cleaned_fetched_data)
+            updated_data = self._add_processed_fetched_data_to_existing(cleaned_fetched_data)
 
             filled_data = self._get_filled_data(updated_data)
 
@@ -1116,7 +1096,7 @@ class AirQualityDataManager(DataManager):
             self.logger.info(f"Air quality data updated for {date}")
 
 
-    def update_next_day(self):
+    def _update_next_day(self):
 
         try:
 
@@ -1133,7 +1113,7 @@ class AirQualityDataManager(DataManager):
 
             update_date_str = next_day_to_fetch.strftime('%Y-%m-%d')
 
-            self.run_update(update_date_str)
+            self._run_update(update_date_str)
 
             return True
 
@@ -1147,7 +1127,9 @@ class AirQualityDataManager(DataManager):
 
 
     def update_to_yesterday(self):
-        """We limit the number of attempts to ensure we can't be stuck in an
+        """Updates pollutant data to yesterday if possible.
+
+        We limit the number of attempts to ensure we can't be stuck in an
         infinite loop. This means we limit the max number of days that can be
         fetched as well.
         """
@@ -1160,7 +1142,7 @@ class AirQualityDataManager(DataManager):
 
         while attempt <= max_attempts and no_fails:
 
-            no_fails = self.update_next_day()
+            no_fails = self._update_next_day()
 
             # Don't bombard the API.
             if no_fails:
@@ -1170,6 +1152,23 @@ class AirQualityDataManager(DataManager):
 
 
 class HistoricalWeatherDataManager(DataManager):
+    """For downloading, cleaning and updating historical weather data.
+
+    Attributes:
+        EXISTING_DATA_FILENAME: String of filename of the current weather forecast data.
+        BACKUPS_PATH: String of path to the folder where downloaded data is stored
+        LOGS_PATH: String of path to the log file.
+        LOCATION_COORDINATES: Dictionary with keys of locations of weather data and values
+            of geographic coordinates as a tuple.
+        LOCATIONS: List of locations of weather data as strings.
+        DATA_COLUMNS: List of strings representing data types to be requested via API.
+        CACHE_DIR: String of path to directory where Meteostat library caches data.
+        CACHE_AGE: Integer representing maximum age of a file in seconds in the Meteostat cache.
+        logger: A logger instance from the Python logging module. Set by subclass.
+        existing_data: A Pandas dataframe containing the existing data.
+        station_ids: A dictionary with keys of locations as string, and values os strings
+            represeting the Meteostat ID for the weather station closest to that location.
+    """
 
     EXISTING_DATA_FILENAME = 'Processed historical weather data'
 
@@ -1201,7 +1200,7 @@ class HistoricalWeatherDataManager(DataManager):
         Hourly.cache_dir = self.CACHE_DIR
 
 
-    def get_nearest_station_ids(self):
+    def _get_nearest_station_ids(self):
 
         # Return cached data if we have it.
         if self.station_ids is not None:
@@ -1226,9 +1225,9 @@ class HistoricalWeatherDataManager(DataManager):
         return self.station_ids
 
 
-    def fetch_hourly_data(self, start_date : str, end_date : str):
+    def _fetch_hourly_data(self, start_date : str, end_date : str):
 
-        station_ids = self.get_nearest_station_ids()
+        station_ids = self._get_nearest_station_ids()
 
         if station_ids is None:
             self.logger.warning(
@@ -1276,30 +1275,24 @@ class HistoricalWeatherDataManager(DataManager):
         return output[required_columns]
 
 
-    def fetch_hourly_data_for_date(self, date : str):
-        return self.fetch_hourly_data(date, date)
+    def _fetch_hourly_data_for_date(self, date : str):
+        return self._fetch_hourly_data(date, date)
 
 
-    def get_backup_path(self, date : str):
+    def _get_backup_path(self, date : str):
         return os.path.join(self.BACKUPS_PATH, f"{date}.gz")
 
 
-    def backup_file_exists(self, date : str):
-        return os.path.exists(self.get_backup_path(date))
+    def _backup_file_exists(self, date : str):
+        return os.path.exists(self._get_backup_path(date))
 
 
-    def save_backup(self, date : str, hourly_data : pd.DataFrame):
-        hourly_data.to_csv(self.get_backup_path(date))
+    def _save_backup(self, date : str, hourly_data : pd.DataFrame):
+        hourly_data.to_csv(self._get_backup_path(date))
         self.logger.info(f"Attempted backup of fetched data for {date}")
 
 
-    def get_previous_day(self, date : str):
-        day = pd.to_datetime(f"{date} 00:00:00")
-        day_before = day - pd.Timedelta(1, 'day')
-        return day_before.strftime('%Y-%m-%d')
-
-
-    def fetch_and_save_data_for_date(self, date : str, prevent_date_gaps = True):
+    def _fetch_and_save_data_for_date(self, date : str, prevent_date_gaps = True):
 
         try:
 
@@ -1311,14 +1304,14 @@ class HistoricalWeatherDataManager(DataManager):
                     return False
 
             # Check we haven't already got the data.
-            if self.backup_file_exists(date):
+            if self._backup_file_exists(date):
                 self.logger.info(f"Data not fetched for {date} because data already exists.")
                 return True
 
 
-            hourly_data = self.fetch_hourly_data_for_date(date)
+            hourly_data = self._fetch_hourly_data_for_date(date)
             if hourly_data is not None:
-                self.save_backup(date, hourly_data)
+                self._save_backup(date, hourly_data)
                 self.logger.info(f"Backup saved for {date}")
 
                 return True
@@ -1331,22 +1324,22 @@ class HistoricalWeatherDataManager(DataManager):
             return False
 
 
-    def fetch_backedup_data(self, date : str) -> pd.DataFrame:
+    def _fetch_backedup_data(self, date : str) -> pd.DataFrame:
 
-        if not self.backup_file_exists(date):
+        if not self._backup_file_exists(date):
             return None
 
-        data = pd.read_csv(self.get_backup_path(date))
+        data = pd.read_csv(self._get_backup_path(date))
         data.rename(columns = {'time' : 'Datetime'}, inplace = True)
         data['Datetime'] = pd.to_datetime(data['Datetime'])
 
         return data
 
 
-    def get_merged_new_and_existing_data(self, date : str):
+    def _get_merged_new_and_existing_data(self, date : str):
 
         existing_data_df = self.get_existing_data_df(temp = True)
-        new_data = self.fetch_backedup_data(date)
+        new_data = self._fetch_backedup_data(date)
         if new_data is None:
             self.logger.warning(
                 f"Could not merge data of {date} with existing data as "
@@ -1374,7 +1367,7 @@ class HistoricalWeatherDataManager(DataManager):
         return merged_data
 
 
-    def fix_error_values(self, df):
+    def _fix_error_values(self, df):
 
         # Set any lowe dewpoint values to the mean.
         df.loc[df['dwpt'] < -10, 'dwpt'] = df['dwpt'].mean()
@@ -1385,18 +1378,18 @@ class HistoricalWeatherDataManager(DataManager):
         return df
 
 
-    def merge_new_and_existing_data(self, date : str):
+    def _merge_new_and_existing_data(self, date : str):
 
         try:
 
-            merged_data = self.get_merged_new_and_existing_data(date)
+            merged_data = self._get_merged_new_and_existing_data(date)
 
             if merged_data is None:
                 return False
 
             filled_data = self._fill_missing_values(merged_data)
 
-            fixed_values = self.fix_error_values(filled_data)
+            fixed_values = self._fix_error_values(filled_data)
 
             self.save_existing_data_df(fixed_values, temp = True)
 
@@ -1412,7 +1405,7 @@ class HistoricalWeatherDataManager(DataManager):
             return False
 
 
-    def update_next_day(self):
+    def _update_next_day(self):
 
         # First check that the next day's data is available.
         today = self._today()
@@ -1426,17 +1419,19 @@ class HistoricalWeatherDataManager(DataManager):
 
         fetch_date_str = next_day_to_fetch.strftime('%Y-%m-%d')
 
-        fetch_success = self.fetch_and_save_data_for_date(fetch_date_str)
+        fetch_success = self._fetch_and_save_data_for_date(fetch_date_str)
         if not fetch_success:
             return False
 
-        merge_success = self.merge_new_and_existing_data(fetch_date_str)
+        merge_success = self._merge_new_and_existing_data(fetch_date_str)
 
         return merge_success
 
 
     def update_to_yesterday(self):
-        """We limit the number of attempts to ensure we can't be stuck in an
+        """Updates historical weather data to yesterday if possible.
+
+        We limit the number of attempts to ensure we can't be stuck in an
         infinite loop. This means we limit the max number of days that can be
         fetched as well.
         """
@@ -1449,7 +1444,7 @@ class HistoricalWeatherDataManager(DataManager):
 
         while attempt <= max_attempts and no_fails:
 
-            no_fails = self.update_next_day()
+            no_fails = self._update_next_day()
 
             # Don't bombard the API.
             if no_fails:

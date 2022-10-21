@@ -1127,7 +1127,7 @@ class AirQualityDataManager(DataManager):
 
 
     def update_to_yesterday(self):
-        """Update pollutant data to yesterday if possible.
+        """Updates pollutant data to yesterday if possible.
 
         We limit the number of attempts to ensure we can't be stuck in an
         infinite loop. This means we limit the max number of days that can be
@@ -1152,6 +1152,23 @@ class AirQualityDataManager(DataManager):
 
 
 class HistoricalWeatherDataManager(DataManager):
+    """For downloading, cleaning and updating historical weather data.
+
+    Attributes:
+        EXISTING_DATA_FILENAME: String of filename of the current weather forecast data.
+        BACKUPS_PATH: String of path to the folder where downloaded data is stored
+        LOGS_PATH: String of path to the log file.
+        LOCATION_COORDINATES: Dictionary with keys of locations of weather data and values
+            of geographic coordinates as a tuple.
+        LOCATIONS: List of locations of weather data as strings.
+        DATA_COLUMNS: List of strings representing data types to be requested via API.
+        CACHE_DIR: String of path to directory where Meteostat library caches data.
+        CACHE_AGE: Integer representing maximum age of a file in seconds in the Meteostat cache.
+        logger: A logger instance from the Python logging module. Set by subclass.
+        existing_data: A Pandas dataframe containing the existing data.
+        station_ids: A dictionary with keys of locations as string, and values os strings
+            represeting the Meteostat ID for the weather station closest to that location.
+    """
 
     EXISTING_DATA_FILENAME = 'Processed historical weather data'
 
@@ -1183,7 +1200,7 @@ class HistoricalWeatherDataManager(DataManager):
         Hourly.cache_dir = self.CACHE_DIR
 
 
-    def get_nearest_station_ids(self):
+    def _get_nearest_station_ids(self):
 
         # Return cached data if we have it.
         if self.station_ids is not None:
@@ -1208,9 +1225,9 @@ class HistoricalWeatherDataManager(DataManager):
         return self.station_ids
 
 
-    def fetch_hourly_data(self, start_date : str, end_date : str):
+    def _fetch_hourly_data(self, start_date : str, end_date : str):
 
-        station_ids = self.get_nearest_station_ids()
+        station_ids = self._get_nearest_station_ids()
 
         if station_ids is None:
             self.logger.warning(
@@ -1258,30 +1275,24 @@ class HistoricalWeatherDataManager(DataManager):
         return output[required_columns]
 
 
-    def fetch_hourly_data_for_date(self, date : str):
-        return self.fetch_hourly_data(date, date)
+    def _fetch_hourly_data_for_date(self, date : str):
+        return self._fetch_hourly_data(date, date)
 
 
-    def get_backup_path(self, date : str):
+    def _get_backup_path(self, date : str):
         return os.path.join(self.BACKUPS_PATH, f"{date}.gz")
 
 
-    def backup_file_exists(self, date : str):
-        return os.path.exists(self.get_backup_path(date))
+    def _backup_file_exists(self, date : str):
+        return os.path.exists(self._get_backup_path(date))
 
 
-    def save_backup(self, date : str, hourly_data : pd.DataFrame):
-        hourly_data.to_csv(self.get_backup_path(date))
+    def _save_backup(self, date : str, hourly_data : pd.DataFrame):
+        hourly_data.to_csv(self._get_backup_path(date))
         self.logger.info(f"Attempted backup of fetched data for {date}")
 
 
-    def get_previous_day(self, date : str):
-        day = pd.to_datetime(f"{date} 00:00:00")
-        day_before = day - pd.Timedelta(1, 'day')
-        return day_before.strftime('%Y-%m-%d')
-
-
-    def fetch_and_save_data_for_date(self, date : str, prevent_date_gaps = True):
+    def _fetch_and_save_data_for_date(self, date : str, prevent_date_gaps = True):
 
         try:
 
@@ -1293,14 +1304,14 @@ class HistoricalWeatherDataManager(DataManager):
                     return False
 
             # Check we haven't already got the data.
-            if self.backup_file_exists(date):
+            if self._backup_file_exists(date):
                 self.logger.info(f"Data not fetched for {date} because data already exists.")
                 return True
 
 
-            hourly_data = self.fetch_hourly_data_for_date(date)
+            hourly_data = self._fetch_hourly_data_for_date(date)
             if hourly_data is not None:
-                self.save_backup(date, hourly_data)
+                self._save_backup(date, hourly_data)
                 self.logger.info(f"Backup saved for {date}")
 
                 return True
@@ -1313,22 +1324,22 @@ class HistoricalWeatherDataManager(DataManager):
             return False
 
 
-    def fetch_backedup_data(self, date : str) -> pd.DataFrame:
+    def _fetch_backedup_data(self, date : str) -> pd.DataFrame:
 
-        if not self.backup_file_exists(date):
+        if not self._backup_file_exists(date):
             return None
 
-        data = pd.read_csv(self.get_backup_path(date))
+        data = pd.read_csv(self._get_backup_path(date))
         data.rename(columns = {'time' : 'Datetime'}, inplace = True)
         data['Datetime'] = pd.to_datetime(data['Datetime'])
 
         return data
 
 
-    def get_merged_new_and_existing_data(self, date : str):
+    def _get_merged_new_and_existing_data(self, date : str):
 
         existing_data_df = self.get_existing_data_df(temp = True)
-        new_data = self.fetch_backedup_data(date)
+        new_data = self._fetch_backedup_data(date)
         if new_data is None:
             self.logger.warning(
                 f"Could not merge data of {date} with existing data as "
@@ -1356,7 +1367,7 @@ class HistoricalWeatherDataManager(DataManager):
         return merged_data
 
 
-    def fix_error_values(self, df):
+    def _fix_error_values(self, df):
 
         # Set any lowe dewpoint values to the mean.
         df.loc[df['dwpt'] < -10, 'dwpt'] = df['dwpt'].mean()
@@ -1367,18 +1378,18 @@ class HistoricalWeatherDataManager(DataManager):
         return df
 
 
-    def merge_new_and_existing_data(self, date : str):
+    def _merge_new_and_existing_data(self, date : str):
 
         try:
 
-            merged_data = self.get_merged_new_and_existing_data(date)
+            merged_data = self._get_merged_new_and_existing_data(date)
 
             if merged_data is None:
                 return False
 
             filled_data = self._fill_missing_values(merged_data)
 
-            fixed_values = self.fix_error_values(filled_data)
+            fixed_values = self._fix_error_values(filled_data)
 
             self.save_existing_data_df(fixed_values, temp = True)
 
@@ -1394,7 +1405,7 @@ class HistoricalWeatherDataManager(DataManager):
             return False
 
 
-    def update_next_day(self):
+    def _update_next_day(self):
 
         # First check that the next day's data is available.
         today = self._today()
@@ -1408,17 +1419,19 @@ class HistoricalWeatherDataManager(DataManager):
 
         fetch_date_str = next_day_to_fetch.strftime('%Y-%m-%d')
 
-        fetch_success = self.fetch_and_save_data_for_date(fetch_date_str)
+        fetch_success = self._fetch_and_save_data_for_date(fetch_date_str)
         if not fetch_success:
             return False
 
-        merge_success = self.merge_new_and_existing_data(fetch_date_str)
+        merge_success = self._merge_new_and_existing_data(fetch_date_str)
 
         return merge_success
 
 
     def update_to_yesterday(self):
-        """We limit the number of attempts to ensure we can't be stuck in an
+        """Updates historical weather data to yesterday if possible.
+
+        We limit the number of attempts to ensure we can't be stuck in an
         infinite loop. This means we limit the max number of days that can be
         fetched as well.
         """
@@ -1431,7 +1444,7 @@ class HistoricalWeatherDataManager(DataManager):
 
         while attempt <= max_attempts and no_fails:
 
-            no_fails = self.update_next_day()
+            no_fails = self._update_next_day()
 
             # Don't bombard the API.
             if no_fails:
