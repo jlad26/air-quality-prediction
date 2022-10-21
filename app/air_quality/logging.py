@@ -1,8 +1,19 @@
+"""Module for defining a logger."""
+
 import os
 import logging
 import sys
 
 def setup_logger(name = __name__, log_filepath = None):
+    """Sets up a Python logging instance.
+
+    Args:
+        name: String of logger name
+        log_filepath: String of path to log file.
+
+    Returns:
+        Python logger instance.
+    """
 
     log_dir = os.path.dirname(log_filepath)
     if not os.path.exists(log_dir):
