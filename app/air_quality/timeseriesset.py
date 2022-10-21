@@ -63,6 +63,16 @@ class TimeSeriesSet:
         subset : list = None,
         end_time = None
     ):
+        """Gets a list of timeseries for the given timeseries type.
+
+        Args:
+            ts_type: String matching one of the timeseries types.
+            subset: List of strings corresponding to which elements to include.
+            end_time: Pandas timestamp representing point after which data should be excluded.
+
+        Returns:
+            List of Darts timeseries.
+        """
 
         ts_names = subset if subset else self.ts_names
         ts_sequence = []
@@ -79,11 +89,29 @@ class TimeSeriesSet:
         return ts_sequence
 
 
-    def start_time(self, ts_phase : str):
-        timeseries = self.ts[ts_phase].values()
+    def start_time(self, ts_type : str):
+        """Gets the start time for the Darts timeseries of the provided type.
+
+        Args:
+            ts_type: String of the timeseries type (e.g., 'train', 'train_val').
+
+        Returns:
+            Pandas timestamp of the start time.
+        """
+
+        timeseries = self.ts[ts_type].values()
         return list(timeseries)[0].start_time()
 
 
-    def end_time(self, ts_phase : str):
-        timeseries = self.ts[ts_phase].values()
+    def end_time(self, ts_type : str):
+        """Gets the end time for the Darts timeseries of the provided type.
+
+        Args:
+            ts_type: String of the timeseries type (e.g., 'train', 'train_val').
+
+        Returns:
+            Pandas timestamp of the end time.
+        """
+
+        timeseries = self.ts[ts_type].values()
         return list(timeseries)[0].end_time()
