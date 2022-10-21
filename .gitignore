@@ -1,6 +1,5 @@
 .ipynb_checkpoints
 app/data
-app/logs
 .env
 *.ipynb
 __pycache__
@@ -8,5 +7,4 @@ app/static/image-plots
 app/static/metrics-plots
 dev-notes.md
 .env.*
-app/Models parameters
 app/prediction_models
