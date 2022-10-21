@@ -16,6 +16,40 @@ from darts.utils.timeseries_generation import datetime_attribute_timeseries
 from darts.metrics import mape, mae
 
 class PollutantPredictor:
+    """For predicting concentrations of a given pollutant.
+
+    Uses trained models, instances of air_quality.model.Model, to produce predictions and
+    metrics as data and in plot form.
+
+    Note that class assumes that there is a separate model for each pollutant rather than a
+    single model trained on all pollutants.
+
+    Attributes:
+        PREDICTION_MODELS_DIR: String of path to the folder where the trained models are located.
+        IMAGE_PLOTS_ABS_DIR: String of path to directory where plots are saved.
+        PLOT_CACHE_SIZE: Size of cache (for caching image plots). Once exceeded, the folder is
+            emptied.
+        pollutant: String representing pollutant to be predicted.
+        model: Instance of trained air_quality.model.Model corresponding to this pollutant.
+        darts_model: Trained Darts model to be used for prediction.
+        train_series_unscaled: Darts timeseries of the unscaled target series used for training.
+        val_series_unscaled: Darts timeseries of the unscaled target series used for validation.
+        target_series_train_val_unscaled: Darts timeseries of the unscaled target series covering
+            both training and validation.
+        target_series_unscaled: Darts timeseries of the entirety of the unscaled target series
+            (i.e., including training, validation, and untrained actual data).
+        target_scaler: Scaler instance used to scale target series during training.
+        target_series: Darts timeseries of the entirety of the scaled target series (i.e.,
+            including training, validation, and untrained actual data).
+        historical_weather_ts: Darts timeseries of the historical weather data for this
+            pollutant.
+        weather_forecast_ts: Darts timeseries of the weather forecast data for this
+            pollutant.
+        past_covariates: Darts timeseries of the past covariates for this pollutant (i.e.,
+            weather data and seasonal time data).
+        future_covariates: Darts timeseries of the future covariates for this pollutant (i.e.,
+            weather data and seasonal time data).
+    """
 
     PREDICTION_MODELS_DIR = os.path.join(os.getcwd(), 'prediction_models')
 
@@ -34,22 +68,22 @@ class PollutantPredictor:
         self.train_series_unscaled = self.model.target_series_unscaled[0]
         self.val_series_unscaled = self.model.val_series_unscaled[0]
         self.target_series_train_val_unscaled = self.model.target_series_train_val_unscaled[0]
-        self.target_series_unscaled = self.get_unscaled_target_series(pollutant)
+        self.target_series_unscaled = self._get_unscaled_target_series(pollutant)
         self.target_scaler = self.model.target_scalers[0]
-        self.target_series = self.get_scaled_target_series()
+        self.target_series = self._get_scaled_target_series()
 
-        self.historical_weather_ts = self.get_historical_weather_ts(pollutant)
-        self.weather_forecast_ts = self.get_weather_forecast_ts(pollutant)
+        self.historical_weather_ts = self._get_historical_weather_ts(pollutant)
+        self.weather_forecast_ts = self._get_weather_forecast_ts(pollutant)
 
-        self.past_covariates = self.get_past_covariates()
-        self.future_covariates = self.get_future_covariates()
+        self.past_covariates = self._get_past_covariates()
+        self.future_covariates = self._get_future_covariates()
 
 
-    def get_forecast_location(self, pollutant):
+    def _get_forecast_location(self, pollutant):
         return 'Marseille' if pollutant == 'SO2' else 'Montpellier'
 
 
-    def convert_existing_df_to_timeseries_dict(self, dataframe : pd.DataFrame):
+    def _convert_existing_df_to_timeseries_dict(self, dataframe : pd.DataFrame):
         ts_categories = {}
         category_col_name = dataframe.columns[0]
 
@@ -64,34 +98,34 @@ class PollutantPredictor:
         return ts_categories
 
 
-    def get_unscaled_target_series(self, pollutant : str):
+    def _get_unscaled_target_series(self, pollutant : str):
         dm_air_quality = dm.AirQualityDataManager()
         existing_data_df = dm_air_quality.get_existing_data_df()
-        ts_categories = self.convert_existing_df_to_timeseries_dict(existing_data_df)
+        ts_categories = self._convert_existing_df_to_timeseries_dict(existing_data_df)
         return ts_categories[pollutant].astype(np.float32)
 
 
-    def get_historical_weather_ts(self, pollutant):
+    def _get_historical_weather_ts(self, pollutant):
         dm_historical_weather = dm.HistoricalWeatherDataManager()
         existing_data_df = dm_historical_weather.get_existing_data_df()
-        ts_categories = self.convert_existing_df_to_timeseries_dict(existing_data_df)
-        location = self.get_forecast_location(pollutant)
+        ts_categories = self._convert_existing_df_to_timeseries_dict(existing_data_df)
+        location = self._get_forecast_location(pollutant)
         return ts_categories[location].astype(np.float32)
 
 
-    def get_weather_forecast_ts(self, pollutant):
+    def _get_weather_forecast_ts(self, pollutant):
         dm_weather_forecast = dm.WeatherForecastDataManager()
         existing_data_df = dm_weather_forecast.get_existing_data_df()
-        ts_categories = self.convert_existing_df_to_timeseries_dict(existing_data_df)
-        location = self.get_forecast_location(pollutant)
+        ts_categories = self._convert_existing_df_to_timeseries_dict(existing_data_df)
+        location = self._get_forecast_location(pollutant)
         return ts_categories[location].astype(np.float32)
 
 
-    def get_scaled_target_series(self):
+    def _get_scaled_target_series(self):
         return self.target_scaler.transform(self.target_series_unscaled)
 
 
-    def get_past_covariates(self):
+    def _get_past_covariates(self):
 
         # Get the extra chunk of data we will use from forecast data.
         _, historical_extension = self.weather_forecast_ts.split_after(
@@ -120,7 +154,7 @@ class PollutantPredictor:
         data_covariates_unscaled = TimeSeries.from_dataframe(historical_extended_df).astype(np.float32)
 
         # Add on time covariates.
-        time_covariates = self.get_time_covariates(data_covariates_unscaled)
+        time_covariates = self._get_time_covariates(data_covariates_unscaled)
         unscaled_covariates = data_covariates_unscaled.concatenate(
             time_covariates, axis = 1
         )
@@ -134,23 +168,14 @@ class PollutantPredictor:
         return scaler.transform(unscaled_covariates)
 
 
-    def get_future_covariates(self):
-        time_covariates = self.get_time_covariates(self.weather_forecast_ts)
+    def _get_future_covariates(self):
+        time_covariates = self._get_time_covariates(self.weather_forecast_ts)
         unscaled_covariates = self.weather_forecast_ts.concatenate(time_covariates, axis = 1)
         scaler = self.model.covariates_scalers['future'][0]
         return scaler.transform(unscaled_covariates)
 
 
-    def get_past_covariates_with_future_covariates_extension(self, past_covariates):
-
-        _, past_covariates_extension = self.future_covariates.split_after(
-            past_covariates.end_time()
-        )
-
-        return past_covariates.concatenate(past_covariates_extension)
-
-
-    def get_time_covariates(self, ts):
+    def _get_time_covariates(self, ts):
         """Returns unscaled time covariates of hour, day of week and month
         for the given timseries.
         """
@@ -166,22 +191,7 @@ class PollutantPredictor:
         return ts_time_features.astype(np.float32)
 
 
-    def get_latest_prediction_start_date(self):
-        """If the target series ends on anything but hour 23 then returns
-        the date of the last timestamp, otherwise returns the day after.
-        """
-        target_end_time = self.target_series.end_time()
-        target_end_date = target_end_time.date()
-
-        if target_end_time.hour == 23:
-            start_date = target_end_date + pd.Timedelta(1, 'hour')
-        else:
-            start_date = target_end_date
-
-        return pd.to_datetime(start_date)
-
-
-    def get_prediction_forecast_horizon(self, target_series, end_time):
+    def _get_prediction_forecast_horizon(self, target_series, end_time):
         """Returns the prediction forecast horizon as the number of time
         steps between the end of the target series and the end time.
         """
@@ -196,7 +206,7 @@ class PollutantPredictor:
         return gap_ts.n_timesteps
 
 
-    def get_predicted_series(self, start : pd.Timestamp, end : pd.Timestamp = None):
+    def _get_predicted_series(self, start : pd.Timestamp, end : pd.Timestamp = None):
 
         if self.target_series.is_within_range(start):
             target_series = self.target_series.drop_after(start)
@@ -208,9 +218,9 @@ class PollutantPredictor:
             if end < self.future_covariates.end_time():
                 end_time = end
 
-        forecast_horizon = self.get_prediction_forecast_horizon(target_series, end_time)
+        forecast_horizon = self._get_prediction_forecast_horizon(target_series, end_time)
 
-        pred_series = self.model.get_predicted_series(
+        pred_series = self.model._get_predicted_series(
             darts_model = self.darts_model,
             series = target_series,
             forecast_horizon = forecast_horizon,
@@ -221,7 +231,7 @@ class PollutantPredictor:
         return pred_series
 
 
-    def get_predicted_series_for_dates(self, start_day : str, end_day : str = ''):
+    def _get_predicted_series_for_dates(self, start_day : str, end_day : str = ''):
 
         start = pd.to_datetime(start_day)
         if end_day:
@@ -229,10 +239,10 @@ class PollutantPredictor:
         else:
             end = None
 
-        return self.get_predicted_series(start, end)
+        return self._get_predicted_series(start, end)
 
 
-    def get_historical_forecasts(
+    def _get_historical_forecasts(
         self,
         start_day : str,
         end_day : str,
@@ -254,7 +264,7 @@ class PollutantPredictor:
             current_forecast_end_day_str = current_forecast_end_day.strftime('%Y-%m-%d')
 
             # Generate the forecast.
-            forecasts.append(self.get_predicted_series_for_dates(
+            forecasts.append(self._get_predicted_series_for_dates(
                 current_forecast_start_day_str, current_forecast_end_day_str))
 
             # Move on by the stride amount.
@@ -263,21 +273,7 @@ class PollutantPredictor:
         return forecasts, start_dates
 
 
-    def get_first_last_whole_days(self, timeseries):
-
-        if timeseries.end_time().hour == 23:
-            last_date = timeseries.end_time().date()
-        else:
-            last_date = timeseries.end_time().date() - pd.Timedelta(1, 'day')
-
-        if timeseries.start_time().hour == 0:
-            first_date = timeseries.start_time().date()
-        else:
-            first_date = timeseries.start_time().date() + pd.Timedelta(1, 'day')
-
-        return (first_date, last_date)
-
-    def get_historical_metrics(
+    def _get_historical_metrics(
         self,
         start_day : str,
         end_day : str,
@@ -285,7 +281,7 @@ class PollutantPredictor:
         stride_days = 1
     ):
 
-        forecasts, start_dates = self.get_historical_forecasts(
+        forecasts, start_dates = self._get_historical_forecasts(
             start_day,
             end_day,
             days_per_forecast = days_per_forecast,
@@ -311,28 +307,8 @@ class PollutantPredictor:
         output['start_date'] = pd.to_datetime(output['start_date'])
         return output
 
-    def plot_historical_metrics(
-        self,
-        start_day : str,
-        end_day : str,
-        days_per_forecast = 1,
-        stride_days = 1
-    ):
 
-        metrics = self.get_historical_metrics(
-            self,
-            start_day ,
-            end_day,
-            days_per_forecast = days_per_forecast,
-            stride_days = stride_days
-        )
-
-        plt.plot(metrics['mape'], metrics['start_dates'])
-        plt.show()
-
-
-
-    def get_bounded_timeseries(self, ts, start, end):
+    def _get_bounded_timeseries(self, ts, start, end):
 
         # Check whether we have an overlap at all.
         if (
@@ -347,7 +323,7 @@ class PollutantPredictor:
         return ts[start_index:(end_index + 1)]
 
 
-    def generate_plot_images(
+    def _generate_plot_images(
         self,
         forecasts,
         show_actuals = True,
@@ -388,7 +364,8 @@ class PollutantPredictor:
                 )
 
 
-    def get_pollutant_plot_dir(self, start, end, absolute_path = True):
+    def _get_pollutant_plot_dir(self, start, end, absolute_path = True):
+
         base_dir = self.IMAGE_PLOTS_ABS_DIR
         start_str = start.strftime('%Y%m%d-%H%M%S')
         end_str = end.strftime('%Y%m%d-%H%M%S')
@@ -401,14 +378,14 @@ class PollutantPredictor:
         return os.path.relpath(abs_filepath, os.getcwd())
 
 
-    def generate_pollutant_plot_images(
+    def _generate_pollutant_plot_images(
         self,
         forecasts,
         show_actuals = True,
         fig_params = {},
     ):
 
-        forecasts_start, forecasts_end = self.get_bounding_times(forecasts)
+        forecasts_start, forecasts_end = self._get_bounding_times(forecasts)
         datefmt = '%-d %b %y'
         start_date = forecasts_start.strftime(datefmt)
         end_date = forecasts_end.strftime(datefmt)
@@ -423,16 +400,15 @@ class PollutantPredictor:
         for img_type, title in wide_titles.items():
             narrow_titles[img_type.replace('wide', 'narrow')] = title.replace(': ', '\n')
 
-        files_dir = self.get_pollutant_plot_dir(forecasts_start, forecasts_end)
+        files_dir = self._get_pollutant_plot_dir(forecasts_start, forecasts_end)
 
-        self.generate_plot_images(
+        self._generate_plot_images(
             forecasts,
             show_actuals = show_actuals,
             files_dir = files_dir,
             fig_params = fig_params,
             titles = {**wide_titles, **narrow_titles}
         )
-
 
 
     def plot_series(
@@ -448,6 +424,22 @@ class PollutantPredictor:
         lang = 'en',
         rc = {},
     ):
+        """Plots provided forecasts series (against actuals if so desired and where possible).
+
+        Plot is either displayed or saved.
+
+        Args:
+            forecasts: List of Darts timeseries representing forecasts.
+            show_actuals: Boolean of whether to display actuals if possible.
+            filepath: String of filepath for where to save file. If not provided, plot is
+                displayed.
+            fig_params: Dictionary of parameters to be passed to Matplotlib plt.figure.
+            title: String of title to be displayed on plot.
+            metrics_with_titles: Boolean of whether to append metrics to title.
+            lang: String of 'en' or 'fr' for English or French.
+            rc: Dictionary to be used by Matplotlib plt.rc() where dictionary keys are groups
+                and values are parameters for the group.
+        """
 
         for group, params in rc.items():
             plt.rc(group, **params)
@@ -460,20 +452,20 @@ class PollutantPredictor:
 
         if show_actuals:
 
-            forecasts_start, forecasts_end = self.get_bounding_times(forecasts)
+            forecasts_start, forecasts_end = self._get_bounding_times(forecasts)
 
             # Get all the timeseries for plotting.
             trained_actual = self.train_series_unscaled
-            plot_trained_actual = self.get_bounded_timeseries(
+            plot_trained_actual = self._get_bounded_timeseries(
                 trained_actual, forecasts_start, forecasts_end)
 
             val_actual = self.val_series_unscaled
-            plot_val_actual = self.get_bounded_timeseries(
+            plot_val_actual = self._get_bounded_timeseries(
                 val_actual, forecasts_start, forecasts_end)
 
             if self.target_series_unscaled.end_time() > val_actual.end_time():
                 _, untrained_actual = self.target_series_unscaled.split_after(val_actual.end_time())
-                plot_untrained_actual = self.get_bounded_timeseries(
+                plot_untrained_actual = self._get_bounded_timeseries(
                     untrained_actual, forecasts_start, forecasts_end)
             else:
                 untrained_actual, plot_untrained_actual = None, None
@@ -558,18 +550,18 @@ class PollutantPredictor:
         if filepath is None:
             plt.show()
         else:
-            self.maybe_create_dir(filepath)
+            self._maybe_create_dir(filepath)
             plt.savefig(filepath)
             plt.close()
 
 
-    def maybe_create_dir(self, filepath):
+    def _maybe_create_dir(self, filepath):
         dir_path = os.path.dirname(filepath)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
 
-    def get_bounding_times(self, forecasts : list):
+    def _get_bounding_times(self, forecasts : list):
 
         start, end = None, None
 
@@ -590,13 +582,26 @@ class PollutantPredictor:
         return start, end
 
 
-    def jsonify_images_dir(self, dir):
+    def _jsonify_images_dir(self, dir):
         return {'plots_dir' : dir}
 
 
     def get_prediction_result_dir(self, start_day, end_day):
+        """Gets the url for the folder where plots are for prediction of the given time period.
 
-        self.maybe_clear_plots_cache()
+        If the plots do not already exist, they are first generated. There are four plots for
+        each prediction representing the two languages and two screen sizes.
+
+        Args:
+            start_day: String of data in form yyyy-mm-dd representing prediction start date.
+            end_day: String of data in form yyyy-mm-dd representing prediction end date.
+
+        Returns:
+            Dictionary with key 'plot_dir' and value being a string of the url to the folders
+            containing the plots.
+        """
+
+        self._maybe_clear_plots_cache()
 
         start = pd.to_datetime(start_day)
         end = pd.to_datetime(end_day) + pd.Timedelta(23, 'hours')
@@ -625,17 +630,17 @@ class PollutantPredictor:
             }
 
         # Check if files already exist.
-        plots_abs_dir = self.get_pollutant_plot_dir(start, end)
-        plots_rel_dir = '/' + self.get_pollutant_plot_dir(start, end, absolute_path = False)
+        plots_abs_dir = self._get_pollutant_plot_dir(start, end)
+        plots_rel_dir = '/' + self._get_pollutant_plot_dir(start, end, absolute_path = False)
 
         if not os.path.exists(plots_abs_dir):
-            forecasts = self.get_predicted_series_for_dates(start_day, end_day)
-            self.generate_pollutant_plot_images(forecasts)
+            forecasts = self._get_predicted_series_for_dates(start_day, end_day)
+            self._generate_pollutant_plot_images(forecasts)
 
-        return self.jsonify_images_dir(plots_rel_dir)
+        return self._jsonify_images_dir(plots_rel_dir)
 
 
-    def maybe_clear_plots_cache(self):
+    def _maybe_clear_plots_cache(self):
         """Removes the plots cache when we have more than 100 plots
         stored.
         """
@@ -661,10 +666,20 @@ class PollutantPredictor:
 
 
     def clear_plots_cache(self):
+        """Clears the cache of all saved plot images."""
         shutil.rmtree(self.IMAGE_PLOTS_ABS_DIR)
 
 
 def get_key_times():
+    """Gets a dictionary of various key times.
+
+    If the key times are not already found in the cache, the key times are calculated and then
+    cached.
+
+    Returns:
+        Dictionary of key times where keys describe the particular key time and value is the Pandas
+        timestamp.
+    """
 
     updater = dm.DataUpdater()
     cached_key_times = updater.fetch_cached_key_times()
