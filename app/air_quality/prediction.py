@@ -220,7 +220,7 @@ class PollutantPredictor:
 
         forecast_horizon = self._get_prediction_forecast_horizon(target_series, end_time)
 
-        pred_series = self.model._get_predicted_series(
+        pred_series = self.model.get_predicted_series(
             darts_model = self.darts_model,
             series = target_series,
             forecast_horizon = forecast_horizon,
