@@ -273,13 +273,25 @@ class PollutantPredictor:
         return forecasts, start_dates
 
 
-    def _get_historical_metrics(
+    def get_historical_metrics(
         self,
         start_day : str,
         end_day : str,
         days_per_forecast = 1,
         stride_days = 1
     ):
+        """Gets metrics for historical forecasts.
+
+        Args:
+            start_day: String of start date for forecasts in form yyyy-mm-dd.
+            end_day: String of end date for forecasts in form yyyy-mm-dd.
+            days_per_forecast: Integer of how many days to include per forecast.
+            stride_days: Integer of how many days to advance from the start date of one forecast
+            to the next forecast.
+
+        Returns:
+            Pandas dataframe of metrics with columns 'start_date', 'mape' and 'mae'.
+        """
 
         forecasts, start_dates = self._get_historical_forecasts(
             start_day,
