@@ -1,5 +1,4 @@
-"""Module for the Air Quality model, which is a wrapper to the
-models of the Darts library.
+"""Module for the Air Quality model, which is a wrapper to the models of the Darts library.
 """
 
 import os
@@ -20,7 +19,7 @@ from torch import nn
 import air_quality.constants as C
 
 class Model:
-    """Warpper for a model from the Darts library.
+    """Wrapper for a model from the Darts library.
 
     This is a wrapper for a model from the Darts library which allows
     a standardized usage of those models.
