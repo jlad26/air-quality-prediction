@@ -318,4 +318,22 @@
         }
     }
 
+    /*================================================================*/
+    /* Custom links */
+
+    const performanceMenuItem = document.getElementById('performance-menu-item');
+
+    const performancePollutantLinks = document.querySelectorAll('.performance-pollutant-link');
+    performancePollutantLinks.forEach(function(performancePollutantLink) {
+        performancePollutantLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log(1);
+            performanceMenuItem.click();
+            setTimeout(function() {
+                document.getElementById('performance-pollutant').scrollIntoView();
+            }, 500)
+
+        });
+    });
+
 })();
