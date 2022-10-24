@@ -541,6 +541,10 @@ jQuery(document).ready(function($){
         !selectedItem.hasClass('selected') &&
         !selectedItem.hasClass('language-switcher')
       ) {
+
+        // Scroll to the top of the page.
+        window.scrollTo(0, 0);
+
         // if it's not already selected
         var selectedPosition = selectedItem.index(),
           activePosition = slidesWrapper.find('li.selected').index();
