@@ -800,6 +800,8 @@ class Model:
         darts_model = None,
         start : str = '',
         end : str = '',
+        forecast_horizon = None,
+        stride = None,
     ):
         """Gets historical forecast(s).
 
@@ -821,13 +823,22 @@ class Model:
             end: A date as a string in the form yyyy-mm-dd, representing when the historical
                 forecasts should end. If not specified, the end of the target series
                 will be used.
+            forecast_horizon: Integer of number of timesteps to predict per forecast.
+            stride: Integer of how many timesteps to advance from the start of one forecast
+                to the next.
 
         Returns:
             A list of Darts timeseries.
         """
 
+        if forecast_horizon is None:
+            forecast_horizon = self.forecast_horizon
+
+        if stride is None:
+            stride = self.forecast_horizon
+
         # Each sequence of timeseries has the same order so we set the index to
-        # use for the pollutant we are backtesting.
+        # use for the series we are backtesting.
         pred_ts_seq_index = self.target_series_names.index(predict_series)
 
         if isinstance(target_series, list):
@@ -848,8 +859,8 @@ class Model:
 
         historical_forecast_args = {
             'series' : target_series,
-            'forecast_horizon' : self.forecast_horizon,
-            'stride' : self.forecast_horizon,
+            'forecast_horizon' : forecast_horizon,
+            'stride' : stride,
             'last_points_only' : False,
             'retrain' : retrain,
             'start' : start,
@@ -1007,7 +1018,9 @@ class Model:
             metrics: A list of strings, containing one, both or neither of 'MAPE'
                 and 'MAE'.
             predict_series: A string indicating for which item metrics should be
-            calculated if several have been provided.
+                calculated if several have been provided.
+            output_type: A string, one of 'both', 'individual' or 'aggregate' indicating which
+                type(s) of metrics to return.
 
         Returns:
             A dictionary of the form {
@@ -1041,13 +1054,11 @@ class Model:
 
             aggregate = metric_func(target_series, forecasts, inter_reduction = np.mean)
 
-            output[metric] = {}
-
             if output_type == 'individual':
-                output[metric] = individual
+                output = individual
 
             elif output_type == 'aggregate':
-                output[metric] = aggregate
+                output = aggregate
 
             else:
                 output[metric] = {
