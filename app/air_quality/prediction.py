@@ -355,6 +355,7 @@ class PollutantPredictor:
         for size in ['narrow', 'wide']:
 
             fig_params['figsize'] = (16, 8) if size == 'wide' else (8, 8)
+            fig_params['dpi'] = 75.0 if size == 'wide' else 85.0
             fontsize = 20 if size == 'wide' else 20
             rc = {'font' : {'size' : fontsize}}
 
