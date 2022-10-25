@@ -50,21 +50,21 @@ https://templatemo.com/tm-503-newline
             <nav>
               <span class="cd-marker item-1"></span>
               <ul>
-                <li class="selected">
+                <li id="home-menu-item" class="selected">
                   <a href="#0">
                     <div class="image-icon"><img src="{{ url_for('static', filename='img/home-icon.png') }}"></div>
                     <h6 class="lang--en">Home</h6>
                     <h6 class="lang--fr">Accueil</h6>
                   </a>
                 </li>
-                <li>
+                <li id="how-it-works-menu-item">
                   <a href="#0">
                     <div class="image-icon"><img src="{{ url_for('static', filename='img/how-it-works-icon.png') }}"></div>
                     <h6 class="lang--en">How It Works</h6>
                     <h6 class="lang--fr">Fonctionnement</h6>
                   </a>
                 </li>
-                <li>
+                <li id="performance-menu-item">
                   <a href="#0">
                     <div class="image-icon"><img src="{{ url_for('static', filename='img/performance-icon.png') }}"></div>
                     <h6 class="lang--en">Performance</h6>
@@ -102,44 +102,64 @@ https://templatemo.com/tm-503-newline
                         <h4 class="lang--fr">Bienvenue</h4>
                         <div class="lang--en">
                           <p>
-                            This project aims to predict air quality 🌍 in <strong>Montpellier, France</strong> by applying machine learning techinques.
+                            <b>What is this project?</b>
+                            A tool to predict air quality 🌍 in <strong>Montpellier, France</strong> using machine learning techinques.
                           </p>
                           <p>
-                            Feel free to use the tool below to view predictions 📈 (current and past) for the five pollutants used
-                            in the EU Air Quality Index (<strong>NO2</strong>, <strong>O3</strong>, <strong>PM10</strong>,
+                            <b>How do I use it?</b>
+                            Make selections under the chart below to view predictions 📈 (current and past) for the five pollutants used in the EU Air Quality Index (<strong>NO2</strong>, <strong>O3</strong>, <strong>PM10</strong>,
                             <strong>PM2.5</strong> and <strong>SO2</strong>). Some scenarios are suggested for you to try. The tool doesn't yet display
                             the resulting Air Quality Index value - it's on my list... 📝
                           </p>
                           <p>
-                            The tool is a personal project I developed as part of my conversion to a data wrangler 🧑‍💻. All code is available
-                            in two repositories:
+                            <b>How well does it work?</b>
+                            Better for some pollutants than others. NO2 gives the best results 🏆. Take a look at <a class="performance-pollutant-link" href="#performance-pollutant">Performance by pollutant</a> for more info.
+                          </p>
+                          <p>
+                            <b>Why this project?</b>
+                            Having retrained as a data wrangler 🧑‍💻, I'm now <strong>actively looking for work</strong> in the field. This is a personal
+                            project I developed entirely on my own as a way to showcase my skills.
+                            If you like what you see, do please check out my profile 👤 at <a target="_blank" href="https://cv.sneezingtrees.com">cv.sneezingtrees.com</a> (includes all my contact details).
+                          </p>
+                          <p>
+                            <b>Where's the detail?</b>
+                            All code is available in two repositories:
                             <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Model Development and Selection</a>
                             and <a href="https://github.com/jlad26/air-quality-prediction" target="_blank">Air Quality Prediction Application</a>.
-                            If you like what you see, do please check out my profile 👤 at <a target="_blank" href="https://cv.sneezingtrees.com">cv.sneezingtrees.com</a>
-                            (includes all my contact details).
                           </p>
                         </div>
                         <div class="lang--fr">
                           <p>
-                            Ce projet a le but de prédire la qualité de l'air 🌍 à <strong>Montpellier, France</strong> en utilisant des techniques
+                            <b>Qu'est-ce que c'est ce projet?</b>
+                            Un outil pour prédire la qualité de l'air 🌍 à <strong>Montpellier, France</strong> qui utilise des techniques
                             d'apprentissage machine.
                           </p>
                           <p>
-                            Vous pouvez vous servir de l'outil ci-dessous pour voir des prédictions 📈 (actuelles et
+                            <b>Comment est-ce que je l'utilise?</b>
+                            Vous pouvez faire des choix sous le diagramme ci-dessous pour voir des prédictions 📈 (actuelles et
                             historiques) pour les cinq polluants de l'Indice Européen de la qualité de l'air (<strong>NO2</strong>, <strong>O3</strong>,
                             <strong>PM10</strong>, <strong>PM2.5</strong> et <strong>SO2</strong>). Quelques scénarios sont mises à votre disposition.
                             L'outil ne produit pas encore la valeur correspondante de l'Indice de la Qualité de l'air - c'est sur ma liste... 📝
                           </p>
                           <p>
-                            L'outil est un projet personnel que j'ai développé dans le cadre de ma conversion en data analyst 🧑‍💻. Le code est
-                            disponible dans deux répertoires:
+                            <b>Fonctionne-t-il bien?</b>
+                            Il fonctionne mieux pour certains polluants que pour d'autres. NO2 donne les meilleurs résultats 🏆. Veuillez voir
+                            <a class="performance-pollutant-link" href="#performance-pollutant">Performance par polluant</a> pour en savoir plus.
+                          </p>
+                          <p>
+                            <b>Pourquoi ce projet?</b>
+                            Après m'être reconverti en data analyste 🧑‍💻, maintenant <strong>je cherche activement du travail</strong> dans ce domaine.
+                            C'est un projet personnel que j'ai développé tout seul pour présenter mes compétences. S'il vous intéresse, veuillez voir
+                            mon profil 👤 à <a target="_blank" href="https://cv.sneezingtrees.com">cv.sneezingtrees.com</a> (où se trouvent mes coordonnées aussi).
+                          </p>
+                          <p>
+                            <b>Où sont les détails?</b>
+                            Tout le code est disponible dans deux répertoires:
                             <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Développement et Sélection du Modèle</a>
                             et <a href="https://github.com/jlad26/air-quality-prediction" target="_blank">Prédicteur de Qualité de l'Air</a>.
-                            Si vous aimez le résultat, veuillez voir mon profil 👤 à
-                            <a target="_blank" href="https://cv.sneezingtrees.com">cv.sneezingtrees.com</a> (où se trouvent mes coordonnées aussi).
                           </p>
                         </div>
-                        <div class="prediction pollutant-date">
+                        <div id="pollutant-date-tool" class="prediction pollutant-date scroll-offset">
                           <img class="plot plot--wide lang--en" src="{{ default_img_dir }}/en-wide.png">
                           <img class="plot plot--wide lang--fr" src="{{ default_img_dir }}/fr-wide.png">
                           <img class="plot plot--narrow lang--en" src="{{ default_img_dir }}/en-narrow.png">
@@ -636,17 +656,18 @@ https://templatemo.com/tm-503-newline
                                 this model was used in the prediction app.
                               </li>
                               <li>
-                                Of 7 model types tested using their default configurations, the <strong>Temporal Fusion Transformer (TFT)</strong>
-                                performed best on the NO2 data. The Auto ARIMA model took too long to train on the full time period so I compared it
-                                with the TFT over a shorter period. As the strongest, the TFT was used in the prediction app.
+                                Of 6 model types tested using their default configurations, the <strong>Temporal Fusion Transformer (TFT)</strong>
+                                performed best on the NO2 data. The Auto ARIMA and Exponential Smoothing models took too long to train so I compared them
+                                with the TFT over a shorter period and/or using fewer samples. As the strongest, the TFT was used in the prediction app.
                               </li>
                               <li>
                                 There are in fact <strong>five</strong> models used in the app - one for each pollutant. Although it is possible
                                 to train a TFT on multiple target series simultaneously I found the results were not as good.
                               </li>
                               <li>
-                                The results of the tests can be seen below for a 1, 3 and 5 day forecast at the beginning of the validation period.
-                                The TFT performs adequately on 1 day and is the <strong>top performer</strong> for 3 and 5 days.
+                                The results of the tests can be seen below for forecasts over the validation period. The test was
+                                run for a 1 day forecast, a 3 day forecast, and a 5 day forecast, each time taking several samples.
+                                The TFT performs well on 1 day and is the <strong>top performer</strong> for 3 and 5 days.
                               </li>
                             </ul>
                           </div>
@@ -678,10 +699,10 @@ https://templatemo.com/tm-503-newline
                                 probable. Une fois entraîné, on a utilisé ce modèle dans l'appli de prédiction.
                               </li>
                               <li>
-                                Des 7 types de modèle évalués en utilisant leur configurations par défaut, le
+                                Des 6 types de modèle évalués en utilisant leur configurations par défaut, le
                                 <strong>Temporal Fusion Transformer (TFT)</strong> a eu les meilleurs résultats sur les données de NO2. Il fallait
-                                trop longtemps pour entraîner le modèle Auto ARIMA sur la période entière donc je l'ai comparé avec le TFT en
-                                utilisant une période plus courte. Soyant toujours le plus performant, le TFT était utilisé dans l'appli de prédiction.
+                                trop longtemps pour entraîner les modèles Auto ARIMA et Exponential Smoothing donc je les ai comparés avec le TFT en
+                                utilisant une période plus courte et/ou moins d'echantillons. Soyant toujours le plus performant, le TFT était utilisé dans l'appli de prédiction.
                               </li>
                               <li>
                                 Il y a en fait <strong>cinq</strong> modèles utilisés par l'appli - un pour chaque polluant. Bien qu'il soit
@@ -689,8 +710,9 @@ https://templatemo.com/tm-503-newline
                                 bons.
                               </li>
                               <li>
-                                Les résultats des évaluations sont affichés ci-dessous pour des prédictions de 1, 3 et 5 jours au début de la
-                                période de validation. Le TFT produit des résultats adéquats pour la prédiction d'un jour et il est
+                                Les résultats des évaluations sont affichés ci-dessous pour des prédictions pendant la période de validation.
+                                On a effectué le test pour une prédiction de 1 jour, une prédiction de 3 jours, et une prédiction de 5 jours, et on a
+                                pris plusieurs échantillons chaque fois. Le TFT produit des bons résultats pour la prédiction de 1 jour et il est
                                 <strong>le plus performant</strong> pour les prédictions de 3 et 5 jours.
                               </li>
                             </ul>
@@ -698,19 +720,19 @@ https://templatemo.com/tm-503-newline
 
                           <div class="three-col">
                             <div class="three-col__col">
-                              <h5 class="lang--en">1 Day</h5>
-                              <h5 class="lang--fr">1 Jour</h5>
-                              <img src="{{ url_for('static', filename='img/1-day-forecast-metrics.png') }}">
+                              <h5 class="lang--en">Initial comparison</h5>
+                              <h5 class="lang--fr">Comparaison initiale</h5>
+                              <img src="{{ url_for('static', filename='img/model-type-metrics.png') }}">
                             </div>
                             <div class="three-col__col">
-                              <h5 class="lang--en">3 Days</h5>
-                              <h5 class="lang--fr">3 Jours</h5>
-                              <img src="{{ url_for('static', filename='img/3-day-forecast-metrics.png') }}">
+                              <h5 class="lang--en">Exponential Smoothing</h5>
+                              <h5 class="lang--fr">Exponential Smoothing</h5>
+                              <img src="{{ url_for('static', filename='img/exponential-smoothing-metrics.png') }}">
                             </div>
                             <div class="three-col__col">
-                              <h5 class="lang--en">5 Day</h5>
-                              <h5 class="lang--fr">5 Jours</h5>
-                              <img src="{{ url_for('static', filename='img/5-day-forecast-metrics.png') }}">
+                              <h5 class="lang--en">Auto ARIMA</h5>
+                              <h5 class="lang--fr">Auto ARIMA</h5>
+                              <img src="{{ url_for('static', filename='img/arima-metrics.png') }}">
                             </div>
                           </div>
 
@@ -844,15 +866,109 @@ https://templatemo.com/tm-503-newline
                 <div class="container">
                   <div class="row">
                     <div class="col-md-12">
-                      <div class="content">
+                      <div id="performance-content" class="content scroll-offset">
 
-                        <h4 class="lang--en">Introduction</h4>
+                        <h4 class="lang--en">Performance Analysis</h4>
                         <div class="lang--en">
                           <p>
-                            Presented below are charts for each pollutant that show how Mean Absolute Error (MAE)
-                            <strong>changes over time</strong>.
+                            Below are various analyses of performance, some used to select the final model, and some used to evaluate
+                            or monitor its performance.
                           </p>
                           <ul>
+                            <li>
+                              <a href="#performance-pollutant">Performance by pollutant</a> - performance of the final model for each pollutant during validation .
+                            </li>
+                            <li>
+                              <a href="#performance-drift">Drift</a> - used to assess when the model needs to be retrained on recent data.
+                            </li>
+                          </ul>
+                          <p>
+                            More detail and <strong>all the code</strong> for these analyses is on
+                            <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Github</a>.
+                          </p>
+                        </div>
+
+                        <h4 class="lang--fr">Analyses de Performance</h4>
+                        <div class="lang--fr">
+                          <p>
+                            Plusiers analyses de performance sont présentées ci-dessous. Certaines étaient utilisées pour choisir le modèle final, et
+                            autres sont utilisées pour évaluer ou surveiller sa performance.
+                          </p>
+                          <ul>
+                            <li>
+                              <a href="#performance-pollutant">Performance par polluant</a> - la performance du modèle final pour chaque polluant pendant la validation.
+                            </li>
+                            <li>
+                              <a href="#performance-drift">Dérive</a> - utilisé pour évaluer quand il faut reformer le modèle avec les données récentes.
+                            </li>
+                          </ul>
+                          <p>
+                            Plus de details et <strong>tout le code</strong> pour ces analyses est disponible sur
+                            <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Github</a>.
+                          </p>
+                        </div>
+
+                      </div>
+
+                      <div id="performance-pollutant" class="content scroll-offset">
+
+                        <h4 class="lang--en back-up-link">
+                          Performance by pollutant
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
+                        <div class="lang--en">
+                          <ul>
+                            <li>
+                              Below are charts for each pollutant that show Mean Absolute Error (MAE) and Mean Absolute Percentage Error (MAPE) during
+                              <strong>validation</strong>.
+                            </li>
+                            <li>
+                              The charts show that <strong>NO2</strong> is predicted the most accurately, and <strong>PM2.5</strong> the least accurately.
+                            </li>
+                            <li>
+                              One possible explanation for the different levels of accuracy is that some pollutants are more strongly influenced by weather,
+                              while others may be more strongly influenced by other factors, such as <strong>traffic intensity</strong> or
+                              <strong>industrial emissions</strong>.
+                            </li>
+                          </ul>
+                        </div>
+
+                        <h4 class="lang--fr back-up-link">
+                          Performance par polluant
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
+                        <div class="lang--fr">
+                          <ul>
+                            <li>
+                              Affiché ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent l'Erreur Absolue Moyenne (MAE)
+                              et le Pourcentage d'Erreur Absolue Moyen (MAPE) pendant l'étape de <strong>validation</strong>.
+                            </li>
+                            <li>
+                              Les diagrammes montrent que la prédiction de la concentration de <strong>NO2</strong> est la plus précise, et que
+                              celle de <strong>PM2.5</strong> est la moins précise.
+                            </li>
+                            <li>
+                              Une explication possible pour les niveaux différents de précision est que certains polluants sont plus affectés par le temps,
+                              et que d'autres sont plus affectés par d'autres facteurs, comme par exemple <strong>l'intensité de circulation</strong>
+                              ou les <strong>émissions de l'industrie</strong>.
+                            </li>
+                          </ul>
+                        </div>
+
+                      </div>
+
+                      <div id="performance-drift" class="content scroll-offset">
+
+                        <h4 class="lang--en back-up-link">
+                          Drift
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
+                        <div class="lang--en">
+                          <ul>
+                            <li>
+                              Presented below are charts for each pollutant that show how Mean Absolute Error (MAE)
+                              <strong>changes over time</strong>.
+                            </li>
                             <li>
                               The charts begin <strong>30 days</strong> before the end of the validation data, and finish at the
                               end of known data.
@@ -869,13 +985,16 @@ https://templatemo.com/tm-503-newline
                           </ul>
                         </div>
 
-                        <h4 class="lang--fr">Introduction</h4>
+                        <h4 class="lang--fr back-up-link">
+                          Dérive
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
                         <div class="lang--fr">
-                          <p>
-                            Affiché ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent comment l'Erreur Absolue
-                            Moyenne (MAE) <strong>change dans le temps</strong>.
-                          </p>
                           <ul>
+                            <li>
+                              Affiché ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent comment l'Erreur Absolue
+                              Moyenne (MAE) <strong>change dans le temps</strong>.
+                            </li>
                             <li>
                               Les données commencent <strong>30 jours</strong> avant la fin de la validation, et elles finissent
                               à la fin des données connues.
@@ -893,9 +1012,6 @@ https://templatemo.com/tm-503-newline
                           </ul>
                         </div>
 
-                      </div>
-
-                      <div class="content">
                         <img class="plot plot--wide lang--en" src="{{ url_mae_en_wide }}">
                         <img class="plot plot--wide lang--fr" src="{{ url_mae_fr_wide }}">
                         <img class="plot plot--narrow lang--en" src="{{ url_mae_en_narrow }}">
