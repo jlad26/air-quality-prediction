@@ -858,7 +858,7 @@ https://templatemo.com/tm-503-newline
                         <h4 class="lang--en">Performance Analysis</h4>
                         <div class="lang--en">
                           <p>
-                            Below are various analyses of performance, some used to select the final model, and some used to evaluate
+                            Below are various analyses of performance. Some were used to select the final model, and some are used to evaluate
                             or monitor its performance.
                           </p>
                           <ul>
@@ -868,9 +868,16 @@ https://templatemo.com/tm-503-newline
                             <li>
                               <a href="#performance-drift">Drift</a> - used to assess when the model needs to be retrained on recent data.
                             </li>
+                            <li>
+                              <a href="#input-output-lengths">Input and output lengths</a> - evaluating optimum input and output lengths.
+                            </li>
+                            <li>
+                              <a href="#multi-vs-separate">Simultaneous vs separate training</a> - assessing whether results are better when training
+                              all pollutants simultaneously or separately.
+                            </li>
                           </ul>
                           <p>
-                            More detail and <strong>all the code</strong> for these analyses is on
+                            More details and <strong>all the code</strong> for these analyses are on
                             <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Github</a>.
                           </p>
                         </div>
@@ -879,7 +886,7 @@ https://templatemo.com/tm-503-newline
                         <div class="lang--fr">
                           <p>
                             Plusiers analyses de performance sont présentées ci-dessous. Certaines étaient utilisées pour choisir le modèle final, et
-                            autres sont utilisées pour évaluer ou surveiller sa performance.
+                            d'autres sont utilisées pour évaluer ou surveiller sa performance.
                           </p>
                           <ul>
                             <li>
@@ -888,9 +895,16 @@ https://templatemo.com/tm-503-newline
                             <li>
                               <a href="#performance-drift">Dérive</a> - utilisé pour évaluer quand il faut reformer le modèle avec les données récentes.
                             </li>
+                            <li>
+                              <a href="#input-output-lengths">Longeur des données entrantes et sortantes</a> - l'évaluation des longueurs optimales.
+                            </li>
+                            <li>
+                              <a href="#multi-vs-separate">Entraînement simultané vs séparé</a> - une évaluation de s'il vaut mieux entraîner tous les
+                              polluants en même temps ou séparément.
+                            </li>
                           </ul>
                           <p>
-                            Plus de details et <strong>tout le code</strong> pour ces analyses est disponible sur
+                            Plus de détails et <strong>tout le code</strong> pour ces analyses sont disponibles sur
                             <a href="https://github.com/jlad26/air-quality-model-selection" target="_blank">Github</a>.
                           </p>
                         </div>
@@ -1004,6 +1018,113 @@ https://templatemo.com/tm-503-newline
                         <img class="plot plot--narrow lang--en" src="{{ url_mae_en_narrow }}">
                         <img class="plot plot--narrow lang--fr" src="{{ url_mae_fr_narrow }}">
                       </div>
+
+                      <div id="input-output-lengths" class="content scroll-offset">
+
+                        <h4 class="lang--en back-up-link">
+                          Input output lengths
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
+                        <div class="lang--en">
+                          <ul>
+                            <li>
+                              Although forecasts longer than the output length are possible, they are <strong>auto-regressive</strong>, meaning that
+                              the first forecast is assumed to be correct and is used to predict the next forecast, and so on. An output length
+                              equal to the maximum desired forecast length is therefore likley to give better results.
+                            </li>
+                            <li>
+                              It seems likely that an input length at least as long as the output length would help performance too. However
+                              the consequence of longer input and output lengths is <strong>longer training times</strong>.
+                            </li>
+                            <li>
+                              The assessment of MAE below is for shorter lengths (32 input and 24 output) - a <strong>"1 day"</strong> forecast - vs
+                              longer lengths (128 input and 120 output) - a <strong>"5 day"</strong> forecast.
+                            </li>
+                            <li>
+                              Since the longer version performed better it was used for the <strong>final model</strong> despite the slightly
+                              longer training times.
+                            </li>
+                          </ul>
+                        </div>
+
+                        <h4 class="lang--fr back-up-link">
+                          Longueurs des données entrantes et sortantes
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
+                        <div class="lang--fr">
+                          <ul>
+                            <li>
+                              Bien que les prédictions plus longues que la longueur des données sortantes soient possibles, elles sont
+                              <strong>auto-regressives</strong>, qui veut dire qu'on présume que la première prédiction est correcte et on l'utilise pour
+                              calculer la prédiction suivante, et ainsi de suite. Il est ainsi probable qu'une longueur des données sortantes égale
+                              à la longueur maximum désirée de prédiction donnera des meilleurs résultats.
+                            </li>
+                            <li>
+                              On peut estimer qu'une longueur des données entrantes égale à ou plus que la longueur des données sortantes aiderait
+                              la performance aussi. Cependant la conséquence des longueurs plus importantes est des
+                              <strong>durées plus longues d'entraînement</strong>.
+                            </li>
+                            <li>
+                              L'évaluation de MAE présentée ci-dessous est pour des longueurs plus courtes (32 entrantes et 24 sortantes) - une prédiction
+                              de <strong>"1 jour"</strong> - vs des longueurs plus longues (128 entrantes et 120 sortantes) - une prédiction
+                              de <strong>"5 jours"</strong>.
+                            </li>
+                            <li>
+                              Puisque la version plus longue a produit les meilleurs résultats elle était utilisée pour le
+                              <strong>modèle</strong> final malgré des durées d'entraînement un peu plus longues.
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div class="result">
+                          <img src="{{ url_for('static', filename='img/input-output-length-metrics.png') }}">
+                        </div>
+                      </div>
+
+                      <div id="multi-vs-separate" class="content scroll-offset">
+
+                        <h4 class="lang--en back-up-link">
+                          Simultaneous vs separate training
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
+                        <div class="lang--en">
+                          <ul>
+                            <li>
+                              Training for several target series at once is possible and may allow a model to <strong>learn relationships</strong>
+                              between the series. However the optimisation of an <strong>overall loss function</strong> may result in worse performance.
+                            </li>
+                            <li>
+                              Testing both approaches gave mixed results. Simultanous training gave better MAE for NO2 but generally worse for the
+                              other pollutants. Given that NO2 was already the best performer I chose to use separate training for
+                              <strong>each pollutant</strong>.
+                            </li>
+                          </ul>
+                        </div>
+
+                        <h4 class="lang--fr back-up-link">
+                          Entraînement simultané ou séparé
+                          <a href="#performance-content" aria-label="Back"></a>
+                        </h4>
+                        <div class="lang--fr">
+                          <ul>
+                            <li>
+                              L'entraînement pour plusieurs séries en même temps est possible et il se peut qu'un modèle puisse
+                              <strong>apprendre des relations</strong> entre les séries par conséquence. Par contre, l'optimisation d'une
+                              <strong>fonction de perte générale</strong> pourrait produire des résultats moins bons.
+                            </li>
+                            <li>
+                              Une évaluation des deux méthodes a produit des résultats mitigés. L'entraînement simultané a donné des valeurs meilleures
+                              de MAE pour NO2 mais des valeurs pires pour les autres polluants en général. Puisque NO2 était déjà le polluant avec les
+                              meilleurs résultats j'ai choisi d'utiliser l'entraînement séparé pour <strong>chaque polluant</strong>.
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div class="result">
+                          <img src="{{ url_for('static', filename='img/simultaneous-vs-individual-metrics.png') }}">
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 </div>
