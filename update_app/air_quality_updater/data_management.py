@@ -17,8 +17,8 @@ import pandas as pd
 import numpy as np
 import shutil
 from io import StringIO
-import air_quality.constants as C
-import air_quality.logging as aqlogging
+import air_quality_updater.constants as C
+import air_quality_updater.logging as aqlogging
 from meteostat import Stations
 from meteostat import Hourly
 

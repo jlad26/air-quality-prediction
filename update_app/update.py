@@ -1,6 +1,6 @@
 """Script called by cron to update data."""
 
-import air_quality.data_management as dm
+import air_quality_updater.data_management as dm
 
 updater = dm.DataUpdater()
 
