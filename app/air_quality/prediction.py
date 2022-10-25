@@ -399,7 +399,7 @@ class PollutantPredictor:
     ):
 
         forecasts_start, forecasts_end = self._get_bounding_times(forecasts)
-        datefmt = '%-d %b %y'
+        datefmt = '%d/%m/%Y'
         start_date = forecasts_start.strftime(datefmt)
         end_date = forecasts_end.strftime(datefmt)
         date_text = f"{start_date}" if start_date == end_date else f"{start_date} - {end_date}"
