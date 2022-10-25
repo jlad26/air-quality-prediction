@@ -920,11 +920,13 @@ https://templatemo.com/tm-503-newline
                         <div class="lang--en">
                           <ul>
                             <li>
-                              Below are charts for each pollutant that show Mean Absolute Error (MAE) and Mean Absolute Percentage Error (MAPE) during
+                              Below are charts for each pollutant that show Mean Absolute Percentage Error (MAPE) during
                               <strong>validation</strong>.
                             </li>
                             <li>
-                              The charts show that <strong>NO2</strong> is predicted the most accurately, and <strong>PM2.5</strong> the least accurately.
+                              The charts show that <strong>NO2</strong> and <strong>O3</strong> are predicted the most accurately, and
+                              <strong>PM2.5</strong> and <strong>SO2</strong> the least accurately. (However note that SO2 often has values
+                              close to zero which can lead to misleadingly high MAPE values.)
                             </li>
                             <li>
                               One possible explanation for the different levels of accuracy is that some pollutants are more strongly influenced by weather,
@@ -941,12 +943,14 @@ https://templatemo.com/tm-503-newline
                         <div class="lang--fr">
                           <ul>
                             <li>
-                              Affiché ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent l'Erreur Absolue Moyenne (MAE)
-                              et le Pourcentage d'Erreur Absolue Moyen (MAPE) pendant l'étape de <strong>validation</strong>.
+                              Affiché ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent le Pourcentage d'Erreur Absolue Moyen
+                              (MAPE) pendant l'étape de <strong>validation</strong>.
                             </li>
                             <li>
-                              Les diagrammes montrent que la prédiction de la concentration de <strong>NO2</strong> est la plus précise, et que
-                              celle de <strong>PM2.5</strong> est la moins précise.
+                              Les diagrammes montrent que la prédiction des concentration de <strong>NO2</strong> et <strong>O3</strong> sont les
+                              plus précises, et que celles de <strong>PM2.5</strong> et <strong>SO2</strong> sont les moins précises. (Cependant
+                              il faut constater que les concentrations de SO2 sont souvent près de zéro, ce qui peut enchaîner des valeurs élevées
+                              de MAPE de façon trompeuse.)
                             </li>
                             <li>
                               Une explication possible pour les niveaux différents de précision est que certains polluants sont plus affectés par le temps,
@@ -955,6 +959,21 @@ https://templatemo.com/tm-503-newline
                             </li>
                           </ul>
                         </div>
+
+                        <img class="plot plot--wide lang--en" src="{{ url_for('static', filename='img/final-model-performance-1-days-en-wide.png') }}">
+                        <img class="plot plot--wide lang--fr" src="{{ url_for('static', filename='img/final-model-performance-1-days-fr-wide.png') }}">
+                        <img class="plot plot--narrow lang--en" src="{{ url_for('static', filename='img/final-model-performance-1-days-en-narrow.png') }}">
+                        <img class="plot plot--narrow lang--fr" src="{{ url_for('static', filename='img/final-model-performance-1-days-fr-narrow.png') }}">
+
+                        <img class="plot plot--wide lang--en" src="{{ url_for('static', filename='img/final-model-performance-3-days-en-wide.png') }}">
+                        <img class="plot plot--wide lang--fr" src="{{ url_for('static', filename='img/final-model-performance-3-days-fr-wide.png') }}">
+                        <img class="plot plot--narrow lang--en" src="{{ url_for('static', filename='img/final-model-performance-3-days-en-narrow.png') }}">
+                        <img class="plot plot--narrow lang--fr" src="{{ url_for('static', filename='img/final-model-performance-3-days-fr-narrow.png') }}">
+
+                        <img class="plot plot--wide lang--en" src="{{ url_for('static', filename='img/final-model-performance-5-days-en-wide.png') }}">
+                        <img class="plot plot--wide lang--fr" src="{{ url_for('static', filename='img/final-model-performance-5-days-fr-wide.png') }}">
+                        <img class="plot plot--narrow lang--en" src="{{ url_for('static', filename='img/final-model-performance-5-days-en-narrow.png') }}">
+                        <img class="plot plot--narrow lang--fr" src="{{ url_for('static', filename='img/final-model-performance-5-days-fr-narrow.png') }}">
 
                       </div>
 
