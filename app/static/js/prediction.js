@@ -216,9 +216,9 @@
     function runScenario(scenario) {
         const scenarioData = {
             'forecast-3' : ['last_forecast_start', 3],
-            'last-training' : ['last_3_training', 3],
-            'last-validation' : ['validation_end_time', 1],
-            'last-known' : ['actual_end_time', 1]
+            'last-training' : ['last_5_training', 5],
+            'last-validation' : ['last_5_validation', 5],
+            'last-known' : ['last_3_actual', 3]
         }
 
         const fp = document.querySelector("#start-pollutant-date")._flatpickr;

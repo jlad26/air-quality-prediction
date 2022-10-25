@@ -726,9 +726,11 @@ def get_key_times():
     key_times = {
         'train_start_time' : train_start_time,
         'train_end_time' : train_end_time,
-        'last_3_training' : train_end_time - pd.Timedelta(2, 'days'),
+        'last_5_training' : train_end_time - pd.Timedelta(4, 'days'),
         'validation_end_time' : validation_end_time,
+        'last_5_validation' : validation_end_time - pd.Timedelta(4, 'days'),
         'actual_end_time' : actual_end_time,
+        'last_3_actual' : actual_end_time - pd.Timedelta(2, 'days'),
         'last_forecast_start' : last_forecast_start,
         'day_before_last_forecast_start' : last_forecast_start - pd.Timedelta(1, 'day'),
         'last_forecast_end' : weather_forecast_dm.get_last_date_current_data(),
