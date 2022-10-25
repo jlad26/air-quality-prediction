@@ -1,4 +1,4 @@
-"""Module for managaing data for the Air Quality predictor.
+"""Module for managaing data updates.
 
 Used for updating:
 - Historical pollutant concentrations.
