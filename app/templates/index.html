@@ -319,10 +319,8 @@ https://templatemo.com/tm-503-newline
                               as inputs to the model.
                             </li>
                             <li>
-                              All data is <strong>hourly</strong>. The model takes in the last 32 hours 🕒 of data in order to predict the next 24 hours.
-                              When a forecast is made for a longer period, the prediction is <strong>auto-regressive</strong>, meaning that the first
-                              day is predicted, then that prediction is used as part of the input for the next day's prediction. This means that
-                              prediction accuracy tends to drop for the later days in a multi-day forecast.
+                              All data is <strong>hourly</strong>. The model takes in the last 128 hours 🕒 of data in order to predict the next 120 hours
+                              (5 days).
                             </li>
                             <li>
                               Predictions are <strong>probabilistic</strong>. The band of colour represents the 5th and 95th quantile of the prediction 🧮.
@@ -336,10 +334,6 @@ https://templatemo.com/tm-503-newline
                             <li>
                               Performance 🚀 is measured using Mean Absolute Error (<strong>MAE</strong>) and Mean Absolute Percentage Error
                               (<strong>MAPE</strong>). Whenever actual data overlaps with prediction data, these metrics are displayed in the chart title.
-                            </li>
-                            <li>
-                              The model seems to perform best for the pollutant <strong>Nitrous Oxide (NO2)</strong>. This may be because its
-                              concentration is more strongly influenced by weather conditions.
                             </li>
                           </ul>
 
@@ -356,11 +350,8 @@ https://templatemo.com/tm-503-newline
                               les entrées du modèle.
                             </li>
                             <li>
-                              Toutes les données sont <strong>horaires</strong>. Le modèle se sert des dernières 32 heures 🕒 des données
-                              pour prédire les 24 heures suivantes. Quand il calcule une prédiction de durée plus longue, la prédiction est
-                              <strong>auto-régressive</strong>, qui veut dire qu'il calcule la prédiction de la première journée, et ensuite
-                              il utilise ce résultat en tant qu'entrée pour la prédiction de la journée suivante. Cela implique que la précision
-                              de la prédiction a tendance à réduire pour les jours ultérieurs d'une prédiction de plusieurs jours.
+                              Toutes les données sont <strong>horaires</strong>. Le modèle se sert des dernières 128 heures 🕒 des données
+                              pour prédire les 120 heures suivantes (5 jours).
                             </li>
                             <li>
                               Les prédictions sont <strong>probabilistes</strong>. La bande de couleur signifie le 5ème quantile et le 95ème
@@ -377,10 +368,6 @@ https://templatemo.com/tm-503-newline
                               La performance 🚀 est calculée en utilisant l'Erreur Absolue Moyenne (<strong>MAE</strong>) et le Pourcentage d'Erreur
                               Absolue Moyen (<strong>MAPE</strong>) . Quand les données connues et les données de prédiction se chevauchent, les deux
                               mesures sont affichées dans le titre du diagramme.
-                            </li>
-                            <li>
-                              On dirait que le modèle est la plus performante en prédisant la concentration du polluant <strong>Nitrous Oxide (NO2)</strong>.
-                              On peut imaginer que cela est parce que sa concentration est plus influencée par le temps.
                             </li>
 
                           </ul>
