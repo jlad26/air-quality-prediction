@@ -27,8 +27,15 @@ def index():
     metric_manager = MetricsManager()
     metrics_plots_urls = metric_manager.get_plot_urls()
 
+    ga_id = C.ENV_VARS['GA_ID'] if 'GA_ID' in C.ENV_VARS else 'none'
+
     return render_template(
-        'index.html', default_img_dir = default_img_dir, **key_times, **metrics_plots_urls)
+        'index.html',
+        default_img_dir = default_img_dir,
+        ga_id = ga_id,
+        **key_times,
+        **metrics_plots_urls
+    )
 
 
 @app.route('/fetch-pollutant')
