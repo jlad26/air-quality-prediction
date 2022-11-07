@@ -159,7 +159,7 @@ https://templatemo.com/tm-503-newline
                           <p>
                             <b>Pourquoi ce projet?</b>
                             Après m'être reconverti en data analyste 🧑‍💻, maintenant <strong>je cherche activement du travail</strong> dans ce domaine.
-                            C'est un projet personnel que j'ai développé tout seul pour présenter mes compétences. S'il vous intéresse, veuillez voir
+                            Ceci est un projet personnel que j'ai développé tout seul pour présenter mes compétences. S'il vous intéresse, veuillez voir
                             mon profil 👤 à <a target="_blank" href="https://cv.sneezingtrees.com">cv.sneezingtrees.com</a> (où se trouvent mes coordonnées aussi).
                           </p>
                           <p>
@@ -292,7 +292,7 @@ https://templatemo.com/tm-503-newline
                               <div></div>
                               <div>
                                 <span class="lang--en">Training</span>
-                                <span class="lang--fr">entraînement</span>
+                                <span class="lang--fr">Entraînement</span>
                               </div>
                             </div>
                           </div>
@@ -339,7 +339,7 @@ https://templatemo.com/tm-503-newline
                               The line shows the median prediction, which is essentially equivalent to the result of a deterministic prediction.
                             </li>
                             <li>
-                              <strong>Training</strong> data is the data the model was trained on. <strong></strong>Validation</strong> data is the data
+                              <strong>Training</strong> data is the data the model was trained on. <strong>Validation</strong> data is the data
                               used to work out when to stop training ✋ (to prevent <strong>over-fitting</strong>). <strong>Known actual</strong> data is data
                               from the past (that we therefore know) which wasn't used in either training or validation.
                             </li>
@@ -463,7 +463,7 @@ https://templatemo.com/tm-503-newline
                               <h4>Développement et sélection du modèle</h4>
                               <ul>
                                 <li>
-                                  <a href="#data-sourcing">Recherche des Données</a> - Identifier et télécharger les données météorologiques et des polluants des sources gratuites
+                                  <a href="#data-sourcing">Recherche des Données</a> - Identifier et télécharger les données des polluants et les données météorologiques des sources gratuites
                                 </li>
                                 <li>
                                   <a href="#data-processing">Traitement des Données</a> - Structurer, nettoyer et remplir les lacunes des données
@@ -537,7 +537,7 @@ https://templatemo.com/tm-503-newline
                                 bulk download. <a href="https://open-meteo.com/" target="_blank">Open Meteo</a> for daily download.
                                 World Weather Online is only free for 30 days, but it has a bulk download facility. Open Meteo does't
                                 have bulk download for data before a certain date, but it is free. Therefore I used both,
-                                <strong>merging</strong>the two sets of data into one.
+                                <strong>merging</strong> the two sets of data into one.
                               </li>
                             </ul>
                           </div>
@@ -608,13 +608,13 @@ https://templatemo.com/tm-503-newline
                           <div class="lang--fr">
                             <ul>
                               <li>
-                                Les concentrations de certains polluants sont mesurés à plusieurs endroits à Montpellier, donc j'ai pris la
+                                Les concentrations de certains polluants sont mesurées à plusieurs endroits à Montpellier, donc j'ai pris la
                                 <strong>moyenne</strong> dans ces cas. Par contre SO2 n'est mesuré nulle part à Montpellier. Le lieu
                                 le plus proche est Marseille donc j'ai utilisé ces données à la place. Cela voulait dire que j'ai dû utiliser
                                 les données météorologiques de <strong>Marseille</strong> pour ce polluant au lieu des données de Montpellier.
                               </li>
                               <li>
-                                Les données ne sont pas toujours complètes et on a dû remplir les lacunes par <strong>interpolation</strong> et
+                                Les données ne sont pas toujours complètes et il fallait remplir les lacunes par <strong>interpolation</strong> et
                                 <strong>forward fill</strong> si nécessaire. Parfois on trouve des périodes longues de plusieurs heures sans valeur.
                                 Quand il manquait plus qu'une demi-journée j'ai copié des donneés du même jour d'une autre année.
                               </li>
@@ -648,9 +648,9 @@ https://templatemo.com/tm-503-newline
                               </li>
                               <li>
                                 The package also allows me to switch easily between validation and test mode. I split the whole dataset into three -
-                                <strong>training (80%)</strong>, <strong>validation (10%)</strong>, and <strong>test (10%)</strong>. When testing
+                                <strong>training (80%)</strong>, <strong>validation (10%)</strong>, and <strong>test (10%)</strong>. When evaluating
                                 models I used the training set to train and the validation set to validate and assess performance. Once the final
-                                model was selected I trained on training and validation combined (90%) and used the test set for
+                                model was selected I trained on training and validation combined (90%) and used the test set (10%) for
                                 <strong>early stopping</strong> (to prevent overfitting), and to estimate likely performance. Once trained,
                                 this model was used in the prediction app.
                               </li>
@@ -679,22 +679,22 @@ https://templatemo.com/tm-503-newline
                             <ul>
                               <li>
                                 La bibliothèque Darts contient des modèles avec des paramètres qui varient selon le type de modèle.
-                                Par conséquent, entraîner plusieurs modèles de manière <strong>standardisée</strong> peut être un
+                                Par conséquent, entraîner plusieurs modèles de manière <strong>standardisée</strong> peut être une
                                 opération lourde, donc j'ai écrit un package Python pour faciliter un tel processus.
                               </li>
                               <li>
-                                Par exemple, mon package inclut automatiquement les <strong>données covariables</strong> passées et/ou futurs
+                                Par exemple, mon package inclut automatiquement les <strong>données covariables</strong> passées et/ou futures
                                 (les données météorologiques) selon la capacité du modèle. Le package permet aussi à l'utilisateur d'exclure
-                                ces données covariables et d'ajouter des données saisonnières temporelles comme l'heure, le jour, et le mois.
-                                C'est utile pour évaluer si l'inclusion des données covariables améliore la performance.
+                                ces données covariables et/ou d'ajouter des données saisonnières temporelles comme l'heure, le jour, et le mois.
+                                Ce fonctionnement est utile pour évaluer si l'inclusion des données covariables améliore la performance.
                               </li>
                               <li>
                                 Le package me permet aussi de changer facilement entre les modes validation et test. J'ai divisé le jeu de données
                                 en trois - <strong>entraînement (80%)</strong>, <strong>validation (10%)</strong>, et <strong>test (10%)</strong>.
                                 En comparant les modèles j'ai utilisé le jeu de données d'entraînement pour entraîner et le jeu de données de
-                                validation pour valider et pour évaluer la performance. Une fois que le modèle final avait été choisie je l'ai
+                                validation pour valider et pour évaluer la performance. Une fois que le modèle final avait été choisi je l'ai
                                 entraîné avec la combinaison des jeux de données d'entraînement et de validation (90%) et j'ai utilisé le jeu de
-                                données de test pour <strong>l'arrêt précoce</strong> (pour éviter overfitting), et pour estimer la performance
+                                données de test (10%) pour <strong>l'arrêt précoce</strong> (pour éviter overfitting), et pour estimer la performance
                                 probable. Une fois entraîné, on a utilisé ce modèle dans l'appli de prédiction.
                               </li>
                               <li>
@@ -719,18 +719,18 @@ https://templatemo.com/tm-503-newline
 
                           <div class="three-col">
                             <div class="three-col__col">
-                              <h5 class="lang--en">Initial comparison</h5>
-                              <h5 class="lang--fr">Comparaison initiale</h5>
+                              <h5 class="lang--en">Initial comparison (MAE)</h5>
+                              <h5 class="lang--fr">Comparaison initiale (MAE)</h5>
                               <img src="{{ url_for('static', filename='img/model-type-metrics.png') }}">
                             </div>
                             <div class="three-col__col">
-                              <h5 class="lang--en">Exponential Smoothing</h5>
-                              <h5 class="lang--fr">Exponential Smoothing</h5>
+                              <h5 class="lang--en">Exponential Smoothing (MAE)</h5>
+                              <h5 class="lang--fr">Exponential Smoothing (MAE)</h5>
                               <img src="{{ url_for('static', filename='img/exponential-smoothing-metrics.png') }}">
                             </div>
                             <div class="three-col__col">
-                              <h5 class="lang--en">Auto ARIMA</h5>
-                              <h5 class="lang--fr">Auto ARIMA</h5>
+                              <h5 class="lang--en">Auto ARIMA (MAE)</h5>
+                              <h5 class="lang--fr">Auto ARIMA (MAE)</h5>
                               <img src="{{ url_for('static', filename='img/arima-metrics.png') }}">
                             </div>
                           </div>
@@ -753,15 +753,15 @@ https://templatemo.com/tm-503-newline
                                 The site is updated automatically each day to show forecasts starting from the <strong>current day</strong>.
                               </li>
                               <li>
-                                New data - pollutants, historical weather and weather forecast - is fetched each day via API
-                                <strong>automatically</strong>, cleaned and added to the existing data set. Several attempts are made
-                                throught the day to fetch data if for any reason data is unavailable when expected.
+                                New data - pollutants, historical weather and weather forecast - is fetched <strong>automatically</strong>
+                                each day via API, cleaned and added to the existing data set. Several attempts are made
+                                throughout the day to fetch data if for any reason data is unavailable when expected.
                               </li>
                             </ul>
                           </div>
 
                           <h4 class="lang--fr back-up-link">
-                            Update process
+                            Processus de mise à jour
                             <a href="#prediction-application" aria-label="Back"></a>
                           </h4>
                           <div class="lang--fr">
@@ -772,9 +772,9 @@ https://templatemo.com/tm-503-newline
                               </li>
                               <li>
                                 Les nouvelles données - les pollutants, les données météorologiques historiques et la prévision météo -
-                                sont récupérees chaque jour par API <strong>automatiquement</strong>, nettoyées et ajoutées au jeu de données
-                                existant. Plusieurs essais sont faits pendant la journée à récupérer les données si pour une raison ou une autre
-                                les données ne sont pas disponibles au moment anticipé.
+                                sont récupérees chaque jour par API <strong>automatiquement</strong>. Elles sont ensuite nettoyées et
+                                ajoutées au jeu de données existant. Plusieurs essais de récuperation des données sont effectués chaque jour
+                                au cas où les données ne sont pas disponibles au moment anticipé pour une raison ou une autre.
                               </li>
                             </ul>
                           </div>
@@ -816,7 +816,7 @@ https://templatemo.com/tm-503-newline
                           </div>
 
                           <h4 class="lang--fr back-up-link">
-                            Deployment
+                            Déploiement
                             <a href="#prediction-application" aria-label="Back"></a>
                           </h4>
                           <div class="lang--fr">
@@ -832,14 +832,15 @@ https://templatemo.com/tm-503-newline
                               </li>
                               <li>
                                 Le site web fonctionne sur <a href="https://flask.palletsprojects.com/" target="_blank">Flask</a> et un serveur web
-                                <a href="https://docs.gunicorn.org/" target="_blank">Gunicorn</a>. La thème est une version customisée du
+                                <a href="https://docs.gunicorn.org/" target="_blank">Gunicorn</a>. La thème du site est une version customisée du
                                 <a href="https://templatemo.com/tm-503-newline" target="_blank">modèle templatemo Newline</a>.
                               </li>
                               <li>
                                 Le site web se sert du
-                                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank">Fetch API</a> Javascript
-                                pour mettre à jour les diagrammes affichés en réponse à la selection d'un(e) utilisateur(se). Les diagrammes qui sont
-                                créés sont cachés dans un cache simple qui si vide quand il contient une certaine quantité de fichier.
+                                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch" target="_blank">Fetch API</a>
+                                de Javascript pour mettre à jour les diagrammes affichés en réponse à la selection d'un(e) utilisateur(se). Les
+                                diagrammes qui sont créés sont cachés dans un cache simple qui se vide quand il contient une certaine quantité
+                                de fichiers.
                               </li>
                             </ul>
                           </div>
@@ -875,7 +876,7 @@ https://templatemo.com/tm-503-newline
                           </p>
                           <ul>
                             <li>
-                              <a href="#performance-pollutant">Performance by pollutant</a> - performance of the final model for each pollutant during validation .
+                              <a href="#performance-pollutant">Performance by pollutant</a> - performance of the final model for each pollutant during validation.
                             </li>
                             <li>
                               <a href="#performance-drift">Drift</a> - used to assess when the model needs to be retrained on recent data.
@@ -1024,7 +1025,7 @@ https://templatemo.com/tm-503-newline
                         <div class="lang--fr">
                           <ul>
                             <li>
-                              Affiché ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent comment l'Erreur Absolue
+                              Affichées ci-dessous sont des diagrammes, un pour chaque polluant, qui montrent comment l'Erreur Absolue
                               Moyenne (MAE) <strong>change dans le temps</strong>.
                             </li>
                             <li>
@@ -1038,7 +1039,7 @@ https://templatemo.com/tm-503-newline
                             </li>
                             <li>
                               On utilise MAE au lieu du Pourcentage d'Erreur Absolue Moyen (MAPE) parce que dans les cas de certains
-                              polluants (surtout SO2) dont leurs concentrations sont près de zéro, la valeur MAPE peut être très élevé
+                              polluants (surtout SO2) dont leurs concentrations sont près de zéro, la valeur MAPE peut être très élevée
                               et par conséquent <strong>dénuée de sens</strong>.
                             </li>
                           </ul>
@@ -1061,7 +1062,7 @@ https://templatemo.com/tm-503-newline
                             <li>
                               Although forecasts longer than the output length are possible, they are <strong>auto-regressive</strong>, meaning that
                               the first forecast is assumed to be correct and is used to predict the next forecast, and so on. An output length
-                              equal to the maximum desired forecast length is therefore likley to give better results.
+                              equal to the maximum desired forecast length is therefore likely to give better results.
                             </li>
                             <li>
                               It seems likely that an input length at least as long as the output length would help performance too. However
@@ -1086,9 +1087,9 @@ https://templatemo.com/tm-503-newline
                           <ul>
                             <li>
                               Bien que les prédictions plus longues que la longueur des données sortantes soient possibles, elles sont
-                              <strong>auto-regressives</strong>, qui veut dire qu'on présume que la première prédiction est correcte et on l'utilise pour
-                              calculer la prédiction suivante, et ainsi de suite. Il est ainsi probable qu'une longueur des données sortantes égale
-                              à la longueur maximum désirée de prédiction donnera des meilleurs résultats.
+                              <strong>auto-regressives</strong>, qui veut dire qu'on présume que la première prédiction soit correcte et on
+                              utilise ce résultat pour calculer la prédiction suivante, et ainsi de suite. Il est ainsi probable qu'une longueur
+                              des données sortantes égale à la longueur maximum désirée de prédiction donnera des meilleurs résultats.
                             </li>
                             <li>
                               On peut estimer qu'une longueur des données entrantes égale à ou plus que la longueur des données sortantes aiderait
