@@ -23,4 +23,4 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 CMD ["gunicorn", "-w", "8", "--bind", "0.0.0.0:5000", "--timeout", "600", "wsgi:app"]
-# CMD ["gunicorn", "-w", "8", "--bind", "0.0.0.0:5000", "--keyfile", "/app/app_data/cert/privkey.pem", "--certfile", "/app/app_data/cert/cert.pem", "--timeout", "600", "wsgi:app"]
+# CMD ["gunicorn", "-w", "8", "--bind", "0.0.0.0:5000", "--keyfile", "/app/app_data/cert/privkey1.pem", "--certfile", "/app/app_data/cert/cert1.pem", "--timeout", "600", "wsgi:app"]
