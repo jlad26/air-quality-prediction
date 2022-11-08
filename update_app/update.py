@@ -1,4 +1,5 @@
-"""Script called by cron to update data."""
+"""Script called by cron to update data.
+"""
 
 import air_quality_updater.data_management as dm
 
