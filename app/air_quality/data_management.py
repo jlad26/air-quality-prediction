@@ -1,4 +1,4 @@
-"""Module for managaing data updates.
+"""Module for managing data updates.
 
 Used for updating:
 - Historical pollutant concentrations.
