@@ -22,6 +22,7 @@ class MetricsManager:
     EXISTING_DATA_DIR = os.path.join(C.WORK_DIR, 'data', 'metrics')
     EXISTING_DATA_PATH = os.path.join(EXISTING_DATA_DIR, 'metrics.pkl')
     METRICS_PLOTS_ABS_DIR = os.path.join(os.getcwd(), 'static', 'metrics-plots')
+    METRICS_DAYS_BEFORE_VAL_END = 30
 
     PLOT_COLORS = {
         'train' : '#2161bc',
@@ -55,6 +56,8 @@ class MetricsManager:
 
         for pollutant in self.POLLUTANTS:
 
+            print(f"Getting historical metrics for {pollutant}: {start_day} to {end_day}")
+            
             predictor = PollutantPredictor(pollutant)
             metric_df = predictor.get_historical_metrics(
                 start_day,
@@ -101,7 +104,7 @@ class MetricsManager:
     def get_required_metrics_first_day(self):
         existing_data = self.get_existing_data()
         if existing_data is None:
-            return pd.to_datetime('2022-01-01').date()
+            return self.get_metrics_start_date()
         return (existing_data['start_date'].max() + pd.Timedelta(1, 'day')).date()
 
 
@@ -150,14 +153,15 @@ class MetricsManager:
         )
 
 
-
-    def generate_daily_metrics_plot_data(
-        self,
-        start_days_before_train_end = 30
-    ):
+    def get_metrics_start_date(self):
 
         val_end_date = self.key_times['validation_end_time'].date()
-        start_date = pd.to_datetime(val_end_date) - pd.Timedelta(start_days_before_train_end, 'days')
+        return pd.to_datetime(val_end_date) - pd.Timedelta(self.METRICS_DAYS_BEFORE_VAL_END, 'days')
+
+
+    def generate_daily_metrics_plot_data(self):
+
+        start_date = self.get_metrics_start_date()
 
         metrics = self.get_existing_data()
 
