@@ -22,7 +22,7 @@ def index():
     # b) determine the forecast to be displayed on page load.
     key_times = prediction.get_key_times()
 
-    end_day = key_times['last_forecast_start'] + timedelta(days = 3)
+    end_day = key_times['last_forecast_start'] + timedelta(days = 2)
 
     # Get the current forecast for NO2 - this is used as the default
     # forecast on initial page load.
