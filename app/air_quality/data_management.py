@@ -120,9 +120,22 @@ class DataUpdater:
         Returns:
             http response code as integer.
         """
+
         home_url = C.ENV_VARS['HOME_URL']
         print(home_url)
         response = requests.request("GET", home_url)
+        return response.status_code
+
+    def clear_image_cache(self):
+        """Send a GET request with key to clear the image cache.
+
+        Returns:
+            http response code as integer.
+        """
+
+        target_url = f"{C.ENV_VARS['HOME_URL']}/clear-plots?{C.ENV_VARS['CACHE_CLEAR_KEY']}"
+        print(target_url)
+        response = requests.request("GET", target_url)
         return response.status_code
 
 
