@@ -134,7 +134,6 @@ class DataUpdater:
         """
 
         url = f"{C.ENV_VARS['HOME_URL']}clear-plots"
-        print(url)
         query_string = {
             'key' : C.ENV_VARS['CACHE_CLEAR_KEY']
         }
