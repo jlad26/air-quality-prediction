@@ -680,7 +680,8 @@ class PollutantPredictor:
 
     def clear_plots_cache(self):
         """Clears the cache of all saved plot images."""
-        shutil.rmtree(self.IMAGE_PLOTS_ABS_DIR)
+        if (os.path.exists(self.IMAGE_PLOTS_ABS_DIR)):
+            shutil.rmtree(self.IMAGE_PLOTS_ABS_DIR)
 
 
 def get_key_times():
