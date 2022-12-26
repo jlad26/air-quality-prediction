@@ -133,10 +133,14 @@ class DataUpdater:
             http response code as integer.
         """
 
-        target_url = f"{C.ENV_VARS['HOME_URL']}/clear-plots?{C.ENV_VARS['CACHE_CLEAR_KEY']}"
-        print(target_url)
-        response = requests.request("GET", target_url)
-        return response.status_code
+        url = f"{C.ENV_VARS['HOME_URL']}clear-plots"
+        print(url)
+        query_string = {
+            'key' : C.ENV_VARS['CACHE_CLEAR_KEY']
+        }
+        print(url)
+        response = requests.request("GET", url, params = query_string)
+        return response.status_code, response.text
 
 
     def update_all(self):
